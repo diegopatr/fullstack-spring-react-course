@@ -1,0 +1,238 @@
+= Testes utilizando Spring Boot
+
+
+The spring-boot-starter-test starter (in the test scope) contains the following provided libraries:
+
+JUnit 5: The de-facto standard for unit testing Java applications.
+
+Spring Test & Spring Boot Test: Utilities and integration test support for Spring Boot applications.
+
+AssertJ: A fluent assertion library.
+
+Hamcrest: A library of matcher objects (also known as constraints or predicates).
+
+Mockito: A Java mocking framework.
+
+JSONassert: An assertion library for JSON.
+
+JsonPath: XPath for JSON.
+
+Awaitility: A library for testing asynchronous systems.
+
+We generally find these common libraries to be useful when writing tests. If these libraries do not suit your needs, you can add additional test dependencies of your own.
+
+
+== Testes unitários
+
+Os testes unitários são responsáveis por verificar o comportamento de uma unidade de código, como um método ou uma classe, de forma isolada. Em um projeto Spring Boot, os testes unitários são geralmente escritos utilizando o framework JUnit e a biblioteca Mockito.
+
+Para criar um teste unitário em um projeto Spring Boot, você pode utilizar a anotação `@SpringBootTest` para carregar o contexto da aplicação e a anotação `@MockBean` para criar um mock de uma dependência. A seguir, apresentamos um exemplo de teste unitário em um serviço de usuário:
+
+[source,java]
+----
+@SpringBootTest
+@AutoConfigureMockMvc
+class ProdutoControllerTests {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockitoBean
+    private ProdutoService produtoService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Test
+    void shouldReturnListOfProdutos() throws Exception {
+        // Arrange
+        Produto produto1 = new Produto(1L, "Produto 1", BigDecimal.valueOf(10.0), 100);
+        Produto produto2 = new Produto(2L, "Produto 2", BigDecimal.valueOf(20.0), 200);
+        List<Produto> produtos = Arrays.asList(produto1, produto2);
+
+        when(produtoService.listarProdutos()).thenReturn(produtos);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/produtos")).andExpect(status().isOk()).andExpect(content().json(objectMapper.writeValueAsString(produtos)));
+
+        verify(produtoService, times(1)).listarProdutos();
+    }
+
+    @Test
+    void shouldReturnProdutoById() throws Exception {
+        // Arrange
+        Produto produto = new Produto(1L, "Produto 1", BigDecimal.valueOf(10.0), 100);
+
+        when(produtoService.buscarProdutoPorId(1L)).thenReturn(produto);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/produtos/1")).andExpect(status().isOk()).andExpect(content().json(objectMapper.writeValueAsString(produto)));
+
+        verify(produtoService, times(1)).buscarProdutoPorId(1L);
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenProdutoByIdDoesNotExist() throws Exception {
+        // Arrange
+        when(produtoService.buscarProdutoPorId(1L)).thenReturn(null);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/produtos/1")).andExpect(status().isNotFound());
+
+        verify(produtoService, times(1)).buscarProdutoPorId(1L);
+    }
+
+    @Test
+    void shouldCreateProduto() throws Exception {
+        // Arrange
+        Produto produto = new Produto(null, "Produto 1", BigDecimal.valueOf(10.0), 100);
+        Produto produtoSalvo = new Produto(1L, "Produto 1", BigDecimal.valueOf(10.0), 100);
+
+        when(produtoService.salvarProduto(produto)).thenReturn(produtoSalvo);
+
+        // Act & Assert
+        var result = mockMvc.perform(post("/api/produtos").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(produto))).andExpect(status().isCreated()).andExpect(content().json(objectMapper.writeValueAsString(produtoSalvo)));
+
+        verify(produtoService, times(1)).salvarProduto(produto);
+    }
+
+    @Test
+    void shouldUpdateProduto() throws Exception {
+        // Arrange
+        Produto produtoAtualizado = new Produto(1L, "Produto Atualizado", BigDecimal.valueOf(15.0), 150);
+
+        when(produtoService.atualizarProduto(eq(1L), any(Produto.class))).thenReturn(produtoAtualizado);
+
+        // Act & Assert
+        mockMvc.perform(put("/api/produtos/1").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(produtoAtualizado))).andExpect(status().isOk()).andExpect(content().json(objectMapper.writeValueAsString(produtoAtualizado)));
+
+        verify(produtoService, times(1)).atualizarProduto(eq(1L), any(Produto.class));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenUpdatingNonExistingProduto() throws Exception {
+        // Arrange
+        Produto produto = new Produto(null, "Produto 1", BigDecimal.valueOf(10.0), 100);
+
+        when(produtoService.atualizarProduto(eq(1L), any(Produto.class))).thenReturn(null);
+
+        // Act & Assert
+        mockMvc.perform(put("/api/produtos/1").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(produto))).andExpect(status().isNotFound());
+
+        verify(produtoService, times(1)).atualizarProduto(eq(1L), any(Produto.class));
+    }
+
+    @Test
+    void shouldDeleteProduto() throws Exception {
+        // Arrange
+        when(produtoService.deletarProduto(1L)).thenReturn(true);
+
+        // Act & Assert
+        mockMvc.perform(delete("/api/produtos/1")).andExpect(status().isNoContent());
+
+        verify(produtoService, times(1)).deletarProduto(1L);
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenDeletingNonExistingProduto() throws Exception {
+        // Arrange
+        when(produtoService.deletarProduto(1L)).thenReturn(false);
+
+        // Act & Assert
+        mockMvc.perform(delete("/api/produtos/1")).andExpect(status().isNotFound());
+
+        verify(produtoService, times(1)).deletarProduto(1L);
+    }
+
+    @Test
+    void shouldPatchProduto() throws Exception {
+        // Arrange
+        Produto produtoExistente = new Produto(1L, "Produto 1", BigDecimal.valueOf(10.0), 100);
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("nome", "Produto Atualizado");
+        Produto produtoAtualizado = new Produto(1L, "Produto Atualizado", BigDecimal.valueOf(10.0), 100);
+
+        when(produtoService.atualizarParcialProduto(1L, updates)).thenReturn(produtoAtualizado);
+
+        // Act & Assert
+        mockMvc.perform(patch("/api/produtos/1").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(updates))).andExpect(status().isOk()).andExpect(content().json(objectMapper.writeValueAsString(produtoAtualizado)));
+
+        verify(produtoService, times(1)).atualizarParcialProduto(1L, updates);
+    }
+}
+----
+
+O código apresentado é uma classe de testes para um controlador REST em uma aplicação Spring Boot. A seguir, detalhamos os principais conceitos envolvidos:
+
+== 1. `@SpringBootTest`
+Essa anotação é utilizada para indicar que a classe é um teste de integração que carrega o contexto completo da aplicação. É particularmente útil para garantir que todas as configurações e dependências estão disponíveis durante os testes.
+
+== 2. `@AutoConfigureMockMvc`
+Essa anotação configura automaticamente o objeto `MockMvc`, que é usado para realizar chamadas simuladas (Mock) a endpoints REST. Esse recurso permite testar controladores de forma isolada sem a necessidade de um servidor real.
+
+== 3. `MockMvc`
+O `MockMvc` é uma ferramenta que permite a realização de testes de integração em controladores REST simulando requisições HTTP. Ele facilita verificar o status da resposta, o conteúdo retornado e outras informações associadas à resposta.
+
+Exemplo de uso:
+* `mockMvc.perform(get("/api/produtos"))` realiza uma chamada HTTP simulado ao endpoint especificado.
+
+== 4. `@MockitoBean`
+Essa anotação é uma alternativa ao uso direto de `@Mock` para injetar dependências simuladas (mocks) nos testes. No exemplo, a dependência `ProdutoService` é mockada para evitar interações com implementações reais.
+
+== 5. `ObjectMapper`
+A classe `ObjectMapper`, fornecida pela biblioteca Jackson, é usada para conversão entre objetos Java e JSON. No teste:
+* É configurada para excluir campos nulos com `objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)`.
+* Utilizada para serializar objetos para JSON (`objectMapper.writeValueAsString(produto)`).
+
+== 6. Ciclo de Teste: Arrange, Act, Assert
+Os testes seguem o padrão conhecido como "AAA" (Arrange, Act, Assert):
+- **Arrange**: Prepara-se o cenário do teste, configurando mocks e instâncias.
+- **Act**: Realiza-se a ação, no caso usando o `MockMvc` para simular requisições HTTP.
+- **Assert**: Verifica-se o resultado esperado com os métodos do `MockMvc` ou `Mockito`.
+
+== 7. `when` e `verify` do Mockito
+- **`when`**: Define o comportamento esperado para métodos simulados. Exemplo: `when(produtoService.listarProdutos()).thenReturn(produtos)` instrui o mock a retornar uma lista específica de produtos quando o método for chamado.
+- **`verify`**: Asserções sobre as interações realizadas, como a quantidade de vezes que um método foi chamado. Exemplo: `verify(produtoService, times(1)).listarProdutos();`.
+
+== 8. Testes HTTP em Controladores REST
+Os testes são realizados para diversos endpoints do controlador REST. Cada caso de teste é projetado para validar o comportamento esperado:
+
+=== Testes de Leitura (`GET`)
+- **`shouldReturnListOfProdutos`**: Verifica se o endpoint para listar produtos retorna a lista correta.
+- **`shouldReturnProdutoById`**: Verifica se o endpoint retorna o produto correto para um dado ID.
+- **`shouldReturnNotFoundWhenProdutoByIdDoesNotExist`**: Valida que o sistema responde com código `404` se o produto não for encontrado.
+
+=== Testes de Criação (`POST`)
+- **`shouldCreateProduto`**: Valida que o endpoint cria um novo produto e retorna o resultado esperado com status `201 Created`.
+
+=== Testes de Atualização (`PUT` e `PATCH`)
+- **`shouldUpdateProduto`**: Valida que o produto é atualizado corretamente.
+- **`shouldReturnNotFoundWhenUpdatingNonExistingProduto`**: Verifica se a resposta é `404` ao tentar atualizar um produto inexistente.
+- **`shouldPatchProduto`**: Valida a atualização parcial (PATCH) de um produto.
+
+=== Testes de Exclusão (`DELETE`)
+- **`shouldDeleteProduto`**: Verifica se o produto é excluído corretamente e retorna o status `204 No Content`.
+- **`shouldReturnNotFoundWhenDeletingNonExistingProduto`**: Garante que ao tentar excluir um produto inexistente a resposta seja `404`.
+
+== 9. HTTP Status Codes
+Os testes estão fundamentados nos códigos de status HTTP corretos para cada operação:
+- **`200 OK`**: Sucesso (GET e PATCH).
+- **`201 Created`**: Sucesso na criação de novo recurso (POST).
+- **`204 No Content`**: Sucesso na exclusão de recurso (DELETE).
+- **`404 Not Found`**: Recurso não encontrado (GET, PUT, DELETE).
+
+== 10. Atualizações Parciais
+No método `shouldPatchProduto`, utiliza-se o verbo HTTP `PATCH`, que permite atualizar campos específicos no recurso. A estrutura `Map<String, Object>` é usada para representar os campos e valores a serem alterados.
+
+== 11. Dependências e Mocking
+Os testes evitam dependências reais de banco de dados ou serviços externos simulando o comportamento da camada de negócio (produtoService). Isso é obtido com o uso de frameworks como o Mockito.
+
+*Exemplo*:
+```java
+when(produtoService.atualizarProduto(eq(1L), any(Produto.class))).thenReturn(produtoAtualizado);
+```
+Acima, simula-se que ao atualizar o produto com ID `1`, um produto atualizado será retornado.
+
+== 12. Test Driven Development (TDD)
+Este tipo de abordagem incentiva a criação de testes unitários/integração como parte do desenvolvimento, ajudando a validar a lógica e identificar regressões.
+

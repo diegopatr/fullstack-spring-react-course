@@ -1,0 +1,555 @@
+= Introdução ao React
+
+== 2. Componentes React
+Um componente é a base de construção de um aplicativo em React. Componentes podem ser escritos como:
+- **Componentes Funcionais** (recomendados) ou
+- **Classes** (forma mais antiga).
+
+=== Exemplo de Componente Funcional
+[source,typescript]
+----
+import React from 'react';
+
+type Props = {
+  name: string;
+};
+
+const Greeting: React.FC<Props> = ({ name }) => {
+  return <h1>Olá, {name}!</h1>;
+};
+
+export default Greeting;
+----
+**Explicação**:
+- `Props` define o tipo das propriedades aceitas pelo componente.
+- O componente `Greeting` recebe um `name` do tipo `string` como prop e exibe uma mensagem no `h1`.
+
+Para utilizar este componente:
+[source,typescript]
+----
+import React from 'react';
+import Greeting from './Greeting';
+
+function App() {
+  return <Greeting name="Mundo" />;
+}
+
+export default App;
+----
+
+== 3. Estado (State)
+O estado armazena dados que podem mudar ao longo do ciclo de vida de um componente.
+
+=== Usando o Hook `useState`
+[source,typescript]
+----
+import React, { useState } from 'react';
+
+function Counter() {
+  const [count, setCount] = useState<number>(0);
+
+  return (
+    <div>
+      <p>Você clicou {count} vezes.</p>
+      <button onClick={() => setCount(count + 1)}>Clique Aqui</button>
+    </div>
+  );
+}
+
+export default Counter;
+----
+**Explicação**:
+- `useState` define o estado `count` e a função `setCount` para atualizá-lo.
+- Sempre utilize a função de atualização (`setCount`) para modificar o estado.
+
+== 4. Efeitos Colaterais (Effects)
+O Hook `useEffect` é usado para lidar com efeitos colaterais como chamadas a APIs, timers, ou manipulações no DOM.
+
+=== Exemplo com `useEffect`
+[source,typescript]
+----
+import React, { useState, useEffect } from 'react';
+
+function Timer() {
+  const [seconds, setSeconds] = useState<number>(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSeconds((prev) => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(timer); // Limpeza do effect
+  }, []);
+
+  return <p>O cronômetro está em: {seconds}s</p>;
+}
+
+export default Timer;
+----
+**Explicação**:
+- `useEffect` sem dependências (`[]`) é executado apenas uma vez.
+- O efeito retorna uma função de limpeza para remover o timer quando o componente for desmontado.
+
+== 5. Trabalhando com Propriedades (Props)
+Props são usadas para passar dados de um componente pai para um componente filho.
+
+=== Exemplo de uso de Props
+[source,typescript]
+----
+type UserProps = {
+  name: string;
+  age: number;
+};
+
+const User: React.FC<UserProps> = ({ name, age }) => {
+  return (
+    <div>
+      <h2>Usuário: {name}</h2>
+      <p>Idade: {age}</p>
+    </div>
+  );
+};
+
+function App() {
+  return <User name="Alice" age={30} />;
+}
+
+export default App;
+----
+**Explicação**:
+- As `Props` são descritas como um tipo `UserProps`.
+- O componente `User` renderiza as propriedades `name` e `age`.
+
+== 6. Eventos no React
+Os eventos no React funcionam de forma semelhante aos eventos no DOM, mas são padronizados pela biblioteca.
+
+=== Exemplo de Manipulação de Eventos
+[source,typescript]
+----
+import React, { MouseEvent } from 'react';
+
+function Button() {
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    console.log('Clicado!', event);
+  };
+
+  return <button onClick={handleClick}>Clique Aqui</button>;
+}
+
+export default Button;
+----
+**Explicação**:
+- O tipo `MouseEvent<HTMLButtonElement>` indica que o evento é disparado em um botão.
+- A função `handleClick` registra o evento ao clicar no botão.
+
+== 7. Renderização Condicional
+O React permite renderizar elementos ou componentes com base em condições.
+
+=== Exemplo de Renderização Condicional
+[source,typescript]
+----
+import React, { useState } from 'react';
+
+function Toggle() {
+  const [isVisible, setIsVisible] = useState<boolean>(true);
+
+  return (
+    <div>
+      <button onClick={() => setIsVisible(!isVisible)}>
+        {isVisible ? 'Ocultar' : 'Mostrar'}
+      </button>
+
+      {isVisible && <p>Este é um texto condicional!</p>}
+    </div>
+  );
+}
+
+export default Toggle;
+----
+**Explicação**:
+- A renderização condicional usa operadores como `&&` ou ternários (`condition ? true : false`).
+- Quando `isVisible` é `true`, o parágrafo é exibido.
+
+== 8. Lista e Chaves (Keys)
+O React usa chaves únicas para melhorar o desempenho ao renderizar listas.
+
+=== Exemplo: Renderizando uma Lista
+[source,typescript]
+----
+type Item = {
+  id: number;
+  name: string;
+};
+
+function ItemList() {
+  const items: Item[] = [
+    { id: 1, name: 'Item 1' },
+    { id: 2, name: 'Item 2' },
+    { id: 3, name: 'Item 3' },
+  ];
+
+  return (
+    <ul>
+      {items.map((item) => (
+        <li key={item.id}>{item.name}</li>
+      ))}
+    </ul>
+  );
+}
+
+export default ItemList;
+----
+**Explicação**:
+- A propriedade `key` é usada para identificar elementos únicos na lista.
+- Cada item da lista usa o campo `id` como chave.
+
+== 9. Contexto (Context)
+O `Context` é usado para compartilhar dados entre componentes sem a necessidade de passá-los explicitamente via props.
+
+=== Exemplo com `Context`
+[source,typescript]
+----
+import React, { createContext, useContext } from 'react';
+
+type Theme = {
+  color: string;
+};
+
+const ThemeContext = createContext<Theme>({ color: 'blue' });
+
+function ThemedText() {
+  const theme = useContext(ThemeContext);
+
+  return <p style={{ color: theme.color }}>Texto com cor temática!</p>;
+}
+
+function App() {
+  return (
+    <ThemeContext.Provider value={{ color: 'green' }}>
+      <ThemedText />
+    </ThemeContext.Provider>
+  );
+}
+
+export default App;
+----
+**Explicação**:
+- `createContext` cria o contexto com o valor padrão.
+- `useContext` acessa os dados do contexto nos componentes filhos.
+
+== Conclusão
+Com este guia, você aprendeu os conceitos básicos do React v19, como:
+- Componentes, Props e Estado.
+- Hooks (`useState`, `useEffect` e `useContext`).
+- Gerenciamento de listas, eventos e renderização condicional.
+
+Explore esses conceitos para construir interfaces modernas e escaláveis usando React e TypeScript!
+
+= Tutorial Passo a Passo: Fundamentos do React com TypeScript
+
+Neste tutorial, abordaremos os conceitos fundamentais e intermediários do React usando TypeScript. Você aprenderá a descrever a UI, adicionar interatividade, e gerenciar o estado da sua aplicação.
+
+== 1. Descrevendo a UI
+
+React é uma biblioteca JavaScript utilizada para renderizar interfaces de usuário (UI). A UI é composta de pequenas unidades como botões, textos e imagens, que podem ser combinadas em componentes reutilizáveis e organizados em árvores de componentes.
+
+=== 1.1 Criando seu Primeiro Componente React
+
+Um componente em React é uma função TypeScript que retorna JSX. Vamos criar nosso primeiro componente que renderiza uma mensagem simples:
+
+[source,typescript]
+----
+import React from 'react';
+
+type Props = {};
+
+const HelloWorld: React.FC<Props> = () => {
+  return <h1>Olá, Mundo!</h1>;
+};
+
+export default HelloWorld;
+----
+
+Para renderizar esse componente no DOM, importe e utilize-o no arquivo de entrada (geralmente `index.tsx` ou `App.tsx`):
+
+[source,typescript]
+----
+import React from 'react';
+import ReactDOM from 'react-dom';
+import HelloWorld from './HelloWorld';
+
+ReactDOM.render(<HelloWorld />, document.getElementById('root'));
+----
+
+=== 1.2 Criando Arquivos com Múltiplos Componentes
+
+Arquivos de múltiplos componentes podem ser úteis para agrupar elementos relacionados:
+
+[source,typescript]
+----
+export const Header: React.FC = () => <h1>Cabeçalho</h1>;
+
+export const Footer: React.FC = () => <footer>Rodapé</footer>;
+
+export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div>
+    <Header />
+    <main>{children}</main>
+    <Footer />
+  </div>
+);
+----
+
+Para usar:
+
+[source,typescript]
+----
+import React from 'react';
+import { Layout } from './Layout';
+
+const App = () => {
+  return (
+    <Layout>
+      <p>Este é o conteúdo da página!</p>
+    </Layout>
+  );
+};
+
+export default App;
+----
+
+=== 1.3 Utilizando JSX e Marcadores no JavaScript
+
+JSX permite escrever HTML diretamente no código JavaScript:
+
+[source,typescript]
+----
+const Button: React.FC = () => {
+  return <button>Clique aqui</button>;
+};
+
+export default Button;
+----
+
+Cada elemento JSX é apenas uma representação de um wrapper, sendo compilado como `React.createElement`.
+
+=== 1.4 Acessando Variáveis com Chaves no JSX
+
+Para usar valores dinâmicos, utilize `{}` no JSX:
+
+[source,typescript]
+----
+type Props = {
+  name: string;
+};
+
+const Welcome: React.FC<Props> = ({ name }) => {
+  return <h1>Bem-vindo, {name}!</h1>;
+};
+----
+
+=== 1.5 Configurando Componentes com Props
+
+Props permitem passar informações para componentes:
+
+[source,typescript]
+----
+type GreetingProps = {
+  name: string;
+};
+
+const Greeting: React.FC<GreetingProps> = ({ name }) => {
+  return <h2>Olá, {name}!</h2>;
+};
+
+export default Greeting;
+----
+Uso:
+[source,typescript]
+----
+<Greeting name="João" />
+----
+
+=== 1.6 Renderização Condicional
+
+Utilize operadores ternários ou `&&` para condições:
+
+[source,typescript]
+----
+type Props = {
+  isLoggedIn: boolean;
+};
+
+const LoginMessage: React.FC<Props> = ({ isLoggedIn }) => {
+  return isLoggedIn ? <h1>Bem-vindo!</h1> : <h1>Por favor, faça login.</h1>;
+};
+----
+Uso:
+[source,typescript]
+----
+<LoginMessage isLoggedIn={true} />
+----
+
+=== 1.7 Renderização de Vários Componentes
+
+Combine arrays e o método `map` para gerar múltiplos componentes:
+
+[source,typescript]
+----
+type Task = {
+  id: number;
+  title: string;
+};
+
+const tasks: Task[] = [
+  { id: 1, title: 'Lavar a louça' },
+  { id: 2, title: 'Fazer compras' },
+];
+
+const TaskList: React.FC = () => {
+  return (
+    <ul>
+      {tasks.map((task) => (
+        <li key={task.id}>{task.title}</li>
+      ))}
+    </ul>
+  );
+};
+----
+
+=== 1.8 Componentes Puros
+
+Componentes puros evitam modificar coisas externas (props ou variáveis externas), mantendo-se previsíveis:
+
+[source,typescript]
+----
+const PureComponent: React.FC<{ text: string }> = ({ text }) => {
+  return <p>{text}</p>;
+};
+----
+
+=== 1.9 Estruturas em Forma de Árvores
+
+Pensar em estruturas como árvores ajuda a organizar seu código:
+
+- Componente raiz envolve componentes filhos:
+
+[source,typescript]
+----
+const App: React.FC = () => {
+  return (
+    <div>
+      <Header />
+      <Content />
+      <Footer />
+    </div>
+  );
+};
+----
+
+== 2. Adicionando Interatividade
+
+Interatividade em React é gerenciada com eventos e atualização de estado.
+
+=== 2.1 Trabalhando com Eventos
+
+Utilize propriedades como `onClick` para manipular eventos:
+
+[source,typescript]
+----
+const Button: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+  return <button onClick={onClick}>Clique aqui</button>;
+};
+----
+Uso:
+[source,typescript]
+----
+<Button onClick={() => alert('Botão clicado!')} />
+----
+
+=== 2.2 Controlando Estados
+
+Estados são valores internos que mudam com o tempo. Use o hook `useState`:
+
+[source,typescript]
+----
+import React, { useState } from 'react';
+
+const Counter: React.FC = () => {
+  const [count, setCount] = useState<number>(0);
+
+  return (
+    <div>
+      <p>Contagem: {count}</p>
+      <button onClick={() => setCount(count + 1)}>Incrementar</button>
+    </div>
+  );
+};
+----
+
+=== 2.3 Atualização em Duas Fases
+
+O React atualiza a UI em duas fases: renderização (virtual DOM) e commit (DOM real).
+
+=== 2.4 Atualizações em Estado
+
+Atualize objetos ou arrays de forma segura:
+
+[source,typescript]
+----
+const updateUser = () => {
+  setUser((prev) => ({ ...prev, name: 'Novo Nome' }));
+};
+----
+
+== 3. Gerenciando Estado
+
+Gerenciar estado ajuda a evitar erros e compartilhar dados entre componentes.
+
+=== 3.1 "Lifting State Up"
+
+Compartilhe estados movendo-os para o componente pai:
+
+[source,typescript]
+----
+const Parent: React.FC = () => {
+  const [value, setValue] = useState<string>('');
+
+  return (
+    <div>
+      <Input value={value} onChange={setValue} />
+      <p>Valor: {value}</p>
+    </div>
+  );
+};
+
+const Input: React.FC<{ value: string; onChange: (value: string) => void }> = ({ value, onChange }) => {
+  return <input value={value} onChange={(e) => onChange(e.target.value)} />;
+};
+----
+
+=== 3.2 Evitando "Prop Drilling"
+
+Use o contexto para evitar passar muitos `props`:
+
+[source,typescript]
+----
+const ThemeContext = React.createContext('light');
+
+const ThemeButton: React.FC = () => {
+  const theme = React.useContext(ThemeContext);
+  return <button theme={theme}>Botão</button>;
+};
+
+const App: React.FC = () => {
+  return (
+    <ThemeContext.Provider value="dark">
+      <ThemeButton />
+    </ThemeContext.Provider>
+  );
+};
+----
+
+== Conclusão
+
+Este tutorial apresentou os conceitos básicos e intermediários do React com TypeScript, incluindo componentes, estados, e organização de dados. Use esses fundamentos para criar UIs robustas e escaláveis!

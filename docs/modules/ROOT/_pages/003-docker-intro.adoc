@@ -1,0 +1,149 @@
+= Docker e Docker Compose
+
+A seguir, vamos abordar os conceitos básicos de Docker e Docker Compose, ferramentas essenciais para o desenvolvimento e implantação de aplicações modernas.
+
+== Docker
+
+Docker é uma plataforma de código aberto que facilita a criação, implantação e execução de aplicações em contêineres. Contêineres são ambientes isolados que contêm todos os recursos necessários para executar uma aplicação, incluindo código, bibliotecas, dependências e configurações.
+
+Com Docker, é possível empacotar uma aplicação e suas dependências em um contêiner, garantindo que ela funcione de maneira consistente em diferentes ambientes, desde o desenvolvimento até a produção.
+
+=== Principais Conceitos
+
+Alguns dos principais conceitos do Docker são:
+
+* **Imagem:** Uma imagem Docker é um pacote que contém todos os recursos necessários para executar uma aplicação, incluindo o código, as dependências e as configurações. As imagens são usadas como base para criar contêineres.
+
+* **Contêiner:** Um contêiner Docker é uma instância em execução de uma imagem. Cada contêiner é isolado e possui seu próprio ambiente de execução, garantindo que a aplicação seja executada de forma independente.
+
+* **Dockerfile:** Um Dockerfile é um arquivo de configuração que descreve como construir uma imagem Docker. Ele contém instruções para instalar dependências, copiar arquivos, configurar o ambiente e executar comandos.
+
+* **Docker Hub:** O Docker Hub é um repositório público de imagens Docker, onde é possível encontrar imagens prontas para uso. Também é possível publicar imagens personalizadas no Docker Hub.
+
+== Docker Compose
+
+Docker Compose é uma ferramenta que facilita a definição e execução de aplicações multi-contêiner em Docker. Com Docker Compose, é possível configurar vários contêineres e suas dependências em um único arquivo de configuração, simplificando o processo de desenvolvimento e implantação de aplicações complexas.
+
+=== Principais Recursos
+
+Alguns dos principais recursos do Docker Compose são:
+
+* **Arquivo de Configuração:** O Docker Compose utiliza um arquivo YAML para definir a configuração da aplicação, incluindo os serviços, as imagens, as variáveis de ambiente e as redes.
+
+* **Orquestração de Contêineres:** Com Docker Compose, é possível orquestrar a execução de vários contêineres de forma coordenada, garantindo que eles se comuniquem entre si e funcionem corretamente.
+
+* **Ambientes de Desenvolvimento:** Docker Compose é amplamente utilizado em ambientes de desenvolvimento, onde é possível configurar rapidamente um ambiente de desenvolvimento consistente e replicável.
+
+* **Integração com Docker Swarm:** Docker Compose pode ser integrado com Docker Swarm, uma ferramenta de orquestração de contêineres em escala de produção, permitindo a implantação de aplicações em ambientes distribuídos.
+
+== Criando um Docker Compose para o Projeto
+
+Vamos criar um arquivo `docker-compose.yml` para definir os serviços de banco de dados que serão utilizados pelo nosso projeto. Neste exemplo, vamos utilizar o PostgreSQL como banco de dados e o pgAdmin como ferramenta de administração.
+
+=== Estrutura do Arquivo `docker-compose.yml`
+
+O arquivo `docker-compose.yml` é um arquivo YAML que define os serviços, as imagens, as variáveis de ambiente e as redes utilizadas pela aplicação. A seguir, apresentamos um exemplo simplificado do arquivo `docker-compose.yml`:
+
+[source,yaml]
+----
+name: springlab
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: db
+    environment:
+      POSTGRES_USER: springlab_user
+      POSTGRES_PASSWORD: springlab_password
+      POSTGRES_DB: springlab_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - springlab-network
+
+  pgadmin:
+    image: dpage/pgadmin4:9
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8081:80"
+    networks:
+      - springlab-network
+
+volumes:
+  postgres_data:
+
+networks:
+  springlab-network:
+----
+
+No exemplo de `docker-compose.yml` fornecido, os parâmetros configuram dois serviços (PostgreSQL e pgAdmin), volumes e redes.
+Abaixo está uma explicação detalhada de cada parâmetro:
+name: springlab * Este é um nome que identifica o projeto ou o conjunto de serviços definidos no arquivo.
+Não é obrigatório, mas ajuda na organização e identificação do ambiente.
+== Para o Serviço `postgres`:
+image: postgres:17
+* Especifica a imagem Docker que será utilizada para o serviço.
+No caso, a imagem `postgres` na versão `17`.
+container_name: db
+* Define o nome do contêiner em execução como `db`.
+Isso facilita a identificação do contêiner no Docker.
+environment:
+POSTGRES_USER: springlab_user
+* Configura o nome do usuário que será criado no banco de dados PostgreSQL.
+POSTGRES_PASSWORD: springlab_password
+* Define a senha do usuário configurado acima.
+POSTGRES_DB: springlab_db
+* Cria um banco de dados com o nome especificado (`springlab_db`).
+ports:
+- "5432:5432"
+* Mapeia a porta `5432` do contêiner para a porta `5432` do host, permitindo acesso ao PostgreSQL externamente.
+volumes:
+- postgres_data:/var/lib/postgresql/data
+* Conecta o volume `postgres_data` ao diretório `/var/lib/postgresql/data` dentro do contêiner.
+Isso garante a persistência dos dados mesmo que o contêiner seja removido.
+networks:
+- springlab-network
+* Conecta o serviço a uma rede chamada `springlab-network`, permitindo que ele se comunique com outros serviços nessa rede.
+== Para o Serviço `pgadmin`:
+image: dpage/pgadmin4:9
+* Define a imagem `dpage/pgadmin4` na versão `9` para o serviço pgAdmin.
+container_name: pgadmin
+* Nomeia o contêiner como `pgadmin`, facilitando sua identificação.
+environment:
+PGADMIN_DEFAULT_EMAIL: admin@example.com
+* Configura o e-mail padrão do administrador para o pgAdmin.
+PGADMIN_DEFAULT_PASSWORD: admin
+* Define a senha padrão do administrador para acesso à interface do pgAdmin.
+ports:
+- "8081:80"
+* Mapeia a porta `80` do contêiner (onde o pgAdmin é acessado) para a porta `8081` do host.
+networks:
+- springlab-network
+* Conecta o serviço pgAdmin à mesma rede `springlab-network`, permitindo que ele se comunique com o serviço PostgreSQL.
+== Para os Volumes:
+volumes:
+postgres_data:
+* Define um volume chamado `postgres_data`, que será utilizado para armazenar os dados persistentes do PostgreSQL.
+== Para as Redes:
+networks:
+springlab-network:
+* Cria uma rede chamada `springlab-network`, na qual os serviços podem se comunicar entre si de forma isolada.
+
+Para executar o arquivo `docker-compose.yml`, basta navegar até o diretório onde o arquivo está localizado e executar o comando `docker-compose up`. Isso iniciará os serviços definidos no arquivo e criará os contêineres correspondentes.
+
+Os principais comandos do Docker Compose são:
+
+* `docker-compose up`: Inicia os serviços definidos no arquivo `docker-compose.yml`.
+* `docker-compose down`: Para e remove os contêineres dos serviços definidos.
+* `docker-compose ps`: Lista os contêineres em execução.
+* `docker-compose logs`: Exibe os logs dos contêineres.
+* `docker-compose exec`: Executa um comando em um contêiner em execução.
+
+Com Docker Compose, é possível simplificar o processo de configuração e execução de aplicações multi-contêiner, facilitando o desenvolvimento e a implantação de aplicações modernas.
+
+Enquanto ambos os serviços estão em execução, você pode acessar o pgAdmin em `http://localhost:8081` e o PostgreSQL em `localhost:5432`.

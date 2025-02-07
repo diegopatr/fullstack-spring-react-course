@@ -1,0 +1,230 @@
+### Tutorial: Manipulação de Formulários no Next.js com TypeScript
+
+Nesta seção, você aprenderá como manipular formulários em Next.js utilizando os conceitos de Server Actions (para requisições no lado do servidor) e Client Components para lidar com formulários em componentes do cliente. Vamos criar um formulário simples que permite adicionar um novo post em nossa aplicação e enviar os dados para um endpoint (emulando um backend real).
+
+#### Estrutura de Diretórios Atualizada
+
+Adicionaremos os seguintes novos arquivos ao nosso projeto:
+
+```
+./
+├── app/
+│   ├── api/
+│   │   └── posts/
+│   │       └── route.ts
+│   ├── create-post/
+│   │   └── page.tsx
+├── components/
+│   ├── CreatePostForm.tsx
+```
+
+---
+
+## Etapa 1: Configurar um Endpoint API para Manipular Posts
+
+Para criar um formulário funcional em Next.js, geralmente é necessário ter um backend que receberá e processará os dados. Aqui, utilizaremos o diretório **`app/api/`** do Next.js para rapidamente criar um endpoint para criar novos posts na nossa "API".
+
+1. Crie o arquivo **`app/api/posts/route.ts`** com a seguinte implementação:
+
+```typescript
+// app/api/posts/route.ts
+
+import { NextResponse } from 'next/server';
+
+interface Post {
+  id: number;
+  title: string;
+  content: string;
+}
+
+let posts: Post[] = []; // Lista simples de posts em memória
+
+// Função para salvar uma nova postagem (apenas simulando, sem banco de dados)
+export async function POST(req: Request) {
+  const body = await req.json();
+
+  if (!body.title || !body.content) {
+    return NextResponse.json(
+      { message: 'Title and content are required!' },
+      { status: 400 }
+    );
+  }
+
+  const newPost = {
+    id: posts.length + 1,
+    title: body.title,
+    content: body.content,
+  };
+  posts.push(newPost);
+
+  return NextResponse.json(
+    { message: 'Post created successfully!', post: newPost },
+    { status: 201 }
+  );
+}
+```
+
+Neste exemplo, estamos mantendo os dados em memória (array `posts`), mas no mundo real você utilizaria um banco de dados para salvar os dados.
+
+---
+
+## Etapa 2: Criar o Componente de Formulário
+
+Agora criaremos um componente reutilizável em **`components/CreatePostForm.tsx`** que seja responsável por capturar os dados inseridos pelo usuário e submetê-los ao endpoint acima.
+
+2. Implemente o arquivo **`CreatePostForm.tsx`** como abaixo:
+
+```typescript
+// components/CreatePostForm.tsx
+'use client';
+
+import React, { useState } from 'react';
+
+export default function CreatePostForm() {
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  // Função para manipular os dados do formulário
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Função para enviar os dados do formulário
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setStatusMessage(null);
+
+    try {
+      const res = await fetch('/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.message);
+      }
+
+      setStatusMessage('Post created successfully!');
+      setFormData({ title: '', content: '' }); // Limpar formulário
+    } catch (error: any) {
+      setStatusMessage(error.message || 'Something went wrong.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+          Title
+        </label>
+        <input
+          type="text"
+          name="title"
+          id="title"
+          value={formData.title}
+          onChange={handleChange}
+          className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          required
+        />
+      </div>
+
+      <div>
+        <label htmlFor="content" className="block text-sm font-medium text-gray-700">
+          Content
+        </label>
+        <textarea
+          name="content"
+          id="content"
+          value={formData.content}
+          onChange={handleChange}
+          rows={4}
+          className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className={`px-4 py-2 text-white rounded-md ${
+          loading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+        }`}
+      >
+        {loading ? 'Submitting...' : 'Create Post'}
+      </button>
+
+      {/* Feedback */}
+      {statusMessage && <p className="mt-2 text-sm text-gray-700">{statusMessage}</p>}
+    </form>
+  );
+}
+```
+
+---
+
+## Etapa 3: Criar a Página de Criação de Posts
+
+Agora vamos criar uma nova página **`/create-post`** onde exibiremos o formulário de criação.
+
+3. Implemente o arquivo **`app/create-post/page.tsx`**:
+
+```typescript
+// app/create-post/page.tsx
+
+import CreatePostForm from '@/components/CreatePostForm';
+
+export default function CreatePostPage() {
+  return (
+    <div className="max-w-3xl mx-auto bg-white p-6 rounded-md shadow-md">
+      <h1 className="text-2xl font-bold mb-4">Create a New Post</h1>
+      <CreatePostForm />
+    </div>
+  );
+}
+```
+
+---
+
+## Etapa 4: Testar o Formulário
+
+1. Inicie seu servidor de desenvolvimento:
+
+```shell script
+npm run dev
+```
+
+2. Acesse a URL **`http://localhost:3000/create-post`** para visualizar e testar o formulário.
+
+3. Preencha o título e conteúdo do post e clique no botão **Create Post**.
+
+4. Verifique se o feedback de sucesso é exibido. Você também pode inspecionar a API simulada em **`app/api/posts/route.ts`** para ver os dados armazenados na lista `posts`.
+
+---
+
+## Etapa 5: Melhorias Adicionais (Opcional)
+
+1. **Validação no Cliente**: Use bibliotecas como [Yup](https://github.com/jquense/yup) ou [React Hook Form](https://react-hook-form.com/) para validação mais robusta no cliente.
+
+2. **Exibir os Posts Criados**: Atualize sua aplicação para exibir os posts enviados na página **`/posts`**, retornando-os no endpoint **`GET /api/posts`**.
+
+---
+
+## Conclusão
+
+Com isso, implementamos com sucesso um formulário no Next.js utilizando TypeScript. A abordagem combinou componentes do cliente para manipular formulários e endpoints na API routes para processamento no lado do servidor. Esse fluxo pode ser estendido para adicionar funcionalidades como edição, exclusão e validação avançada.

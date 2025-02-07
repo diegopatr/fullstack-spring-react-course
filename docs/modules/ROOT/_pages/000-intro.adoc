@@ -1,0 +1,38 @@
+= Introdução
+
+== Spring e Spring Boot
+
+O Spring é um dos frameworks mais populares para desenvolvimento de aplicações Java. Ele fornece uma infraestrutura abrangente para desenvolver aplicativos empresariais, permitindo que os desenvolvedores se concentrem na lógica de negócios.
+
+O Spring Boot é um projeto da Spring que visa facilitar a criação de aplicativos Spring. Ele simplifica a configuração e o desenvolvimento de aplicativos Spring, fornecendo dependências e configurações padrão para a maioria dos casos de uso.
+
+O Spring Boot, por definição, é um framework web open source baseado em Java, usado para criar aplicações independentes e prontas para produção, construídas sobre o Spring e Java.
+Ele simplifica ainda mais o desenvolvimento ao oferecer uma série de componentes pré-configurados e um servidor embutido, permitindo que os desenvolvedores foquem na lógica de negócios em vez de configurações e tarefas repetitivas.
+
+Uma das principais diferenças entre o Spring e o Spring Boot está na facilidade de configuração.
+Enquanto o Spring reduziu muito a quantidade de código boilerplate necessário, o Spring Boot vai além, eliminando ainda mais esforços para configuração e setup.
+Ele vem com configurações automáticas baseadas nas dependências adicionadas ao projeto, como integração com banco de dados ou um servidor web embutido prontos para uso.
+
+Outro benefício significativo é o suporte a *Spring Boot Starters*, que são pacotes de dependências pré-definidas para funcionalidades específicas como desenvolvimento de APIs REST ou aplicações web.
+Além disso, há o suporte a ferramentas como *Spring Boot Actuator*, para monitoramento, e *DevTools*, que acelera o desenvolvimento com recursos como recarregamento automático.
+
+Com o Spring Boot, um projeto pode ser iniciado rapidamente e executado como um único arquivo JAR, sem precisar de servidores externos para deploy.
+Isso economiza tempo, reduz custos e facilita as atualizações contínuas.
+
+Resumindo, o Spring Boot acelera o desenvolvimento de aplicações, fornecendo uma base robusta e pré-configurada que simplifica tanto o processo de criação quanto de manutenção, tornando-o uma escolha popular entre desenvolvedores Java.
+
+== Arquitetura do Spring Boot
+
+O Spring Boot segue uma arquitetura baseada em convenções, o que significa que ele fornece configurações padrão para a maioria dos casos de uso.
+
+A arquitetura do Spring Boot é composta por várias camadas, cada uma com um propósito específico. As principais camadas são:
+
+* **Camada de Controladores (Controllers):** Responsável por receber as requisições HTTP e direcioná-las para os serviços apropriados.
+* **Camada de Serviços (Services):** Responsável pela lógica de negócios da aplicação. Aqui são implementadas as regras de negócio e a lógica de processamento.
+* **Camada de Repositórios (Repositories):** Responsável pela interação com o banco de dados. Aqui são definidas as operações de leitura e escrita no banco de dados.
+* **Camada de Modelos (Models):** Responsável por representar as entidades do domínio da aplicação. Aqui são definidas as classes que representam os dados manipulados pela aplicação.
+* **Camada de Configuração (Configuration):** Responsável por configurar o contexto da aplicação, definindo beans e configurações específicas.
+* **Camada de Segurança (Security):** Responsável por garantir a segurança da aplicação, autenticando e autorizando os usuários.
+
+image::005-spring-boot-architecture.png[]
+

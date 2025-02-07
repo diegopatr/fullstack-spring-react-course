@@ -1,0 +1,567 @@
+= Aula 1: Introdução ao Desenvolvimento Web com React e Spring Boot
+
+== Introdução ao Projeto e Tecnologias
+
+Nesta disciplina, vamos desenvolver um Sistema de Controle de Chamados, uma aplicação web completa que permite a empresas gerenciarem solicitações de suporte técnico de seus clientes.  Este projeto nos permitirá explorar e aplicar conceitos importantes do desenvolvimento web moderno utilizando tecnologias como React no frontend e Spring Boot no backend.
+
+=== Sistema de Controle de Chamados: Descrição do Projeto
+
+O sistema permitirá que clientes registrem chamados, descrevendo seus problemas e anexando arquivos. Técnicos poderão visualizar, atualizar o status e resolver os chamados.  Administradores terão acesso a funcionalidades de gerenciamento do sistema, como criação de usuários e relatórios.  O projeto incluirá recursos como autenticação, autorização, notificações e integração com serviços externos.
+
+=== Tecnologias Utilizadas
+
+* **React:** Biblioteca JavaScript para construção de interfaces de usuário (frontend). Permite criar componentes reutilizáveis e dinâmicos, tornando o desenvolvimento mais eficiente e organizado.
+* **Spring Boot:** Framework Java que simplifica o desenvolvimento de aplicações backend robustas e escaláveis. Facilita a configuração, integração com outras tecnologias e o deploy da aplicação.
+* **REST APIs:**  Arquitetura para comunicação entre frontend e backend.  Utilizaremos APIs REST para troca de dados entre o React e o Spring Boot.
+* **Banco de Dados Relacional (PostgreSQL):**  Utilizaremos um banco de dados relacional para armazenar as informações do sistema, como dados de usuários, chamados e clientes.  O PostgreSQL é um exemplo, mas outros bancos de dados como MySQL ou MariaDB também podem ser utilizados.
+* **Git:** Sistema de controle de versão essencial para o desenvolvimento colaborativo.  Permite rastrear as mudanças no código, trabalhar em equipe e gerenciar diferentes versões do projeto.
+
+== Configuração do Ambiente de Desenvolvimento
+
+Para começar, precisamos configurar o ambiente de desenvolvimento com as ferramentas necessárias. Siga os passos abaixo:
+
+. Instalação do JDK (Java Development Kit)
+* Acesse o site da Oracle ou OpenJDK e baixe a versão mais recente do JDK compatível com seu sistema operacional.
+* Siga as instruções de instalação do JDK.
+
+. Instalação do Node.js e npm (Node Package Manager)
+* Acesse o site oficial do Node.js e baixe o instalador LTS (Long Term Support) recomendado.
+* Instale o Node.js. O npm será instalado automaticamente junto com o Node.js.
+
+. Instalação de uma IDE (Integrated Development Environment)
+* Recomendamos o uso de uma IDE como IntelliJ IDEA (para Spring Boot) e VS Code (para React), mas você pode utilizar a IDE de sua preferência.
+
+. Instalação do PostgreSQL (ou outro banco de dados relacional)
+* Baixe e instale o PostgreSQL.
+* Crie um novo banco de dados para o projeto.
+* Anote as credenciais de acesso ao banco de dados (usuário, senha, nome do banco).
+
+== Criação do Projeto Base
+
+=== Backend com Spring Boot
+
+1. Acesse https://start.spring.io/ [start.spring.io].
+2. Configure o projeto:
+* Selecione Maven ou Gradle (recomendamos Maven).
+* Escolha a linguagem Java.
+* Informe as informações do projeto (Group, Artifact, etc.).
+* Adicione as dependências necessárias: `Spring Web`, `Spring Data JPA`, `PostgreSQL Driver`, `Spring Security`.
+3. Gere o projeto e importe-o na sua IDE.
+
+image::01-spring-initializr.png[]
+
+image::02-spring-initializr-preview.png[]
+
+=== Frontend com React
+
+1. Abra o terminal e execute o seguinte comando para criar o projeto React:
+
+[source,bash]
+----
+npx create-react-app frontend
+----
+
+2. Navegue até o diretório do projeto:
+
+[source,bash]
+----
+cd frontend
+----
+
+3. Instale as dependências necessárias:
+
+[source,bash]
+----
+npm install axios react-router-dom @material-ui/core @material-ui/icons
+----
+
+(ou `yarn add axios react-router-dom @material-ui/core @material-ui/icons` se você estiver utilizando Yarn)
+
+
+== Introdução ao Git
+
+1. Crie um repositório Git para o projeto (pode ser no GitHub, GitLab, Bitbucket, etc.).
+2. Inicialize o Git no diretório raiz do projeto backend:
+
+[source,bash]
+----
+git init
+----
+
+3. Adicione todos os arquivos ao repositório:
+
+[source,bash]
+----
+git add .
+----
+
+4. Faça o primeiro commit:
+
+[source,bash]
+----
+git commit -m "Initial commit"
+----
+
+
+Repita os passos 2 a 4 para o projeto frontend.
+
+Com o ambiente configurado e o projeto base criado, estamos prontos para começar a desenvolver nosso Sistema de Controle de Chamados.  Nas próximas aulas, vamos nos aprofundar em cada uma das tecnologias e construir as funcionalidades do sistema passo a passo.
+
+=== Exemplo de Configuração do build.gradle.kts no Backend
+
+No projeto backend utilizando Spring Boot, o arquivo `build.gradle.kts` deve incluir as dependências e configurações relevantes para o desenvolvimento da aplicação.
+Veja abaixo um exemplo de configuração:
+
+[source,kotlin]
+----
+plugins {
+	java
+	id("org.springframework.boot") version "3.4.2"
+	id("io.spring.dependency-management") version "1.1.7"
+}
+
+group = "br.upf"
+version = "0.0.1-SNAPSHOT"
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation("org.springframework.boot:spring-boot-starter")
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.withType<Test> {
+	useJUnitPlatform()
+}
+----
+
+=== Como Incluir Suporte ao Spring Web no Projeto taskdesk-backend
+
+Para adicionar suporte ao Spring Web em um projeto Spring Boot, siga os passos abaixo:
+
+1. **Acessar o build.gradle.kts do Projeto**
+
+   Abra o arquivo `build.gradle.kts` do backend em sua IDE.
+
+2. **Adicionar a Dependência do Spring Web**
+
+   No bloco `dependencies`, adicione a seguinte dependência para incluir o Spring Web:
+
+   ```kotlin
+   dependencies {
+       implementation("org.springframework.boot:spring-boot-starter-web")
+   }
+   ```
+
+   Isso garantirá que o suporte ao desenvolvimento de APIs REST e controladores web esteja disponível.
+
+3. **Atualizar as Dependências do Projeto**
+
+   Após adicionar a dependência, execute o comando para sincronizar e atualizar as dependências do projeto:
+
+   ```bash
+   ./gradlew build
+   ```
+
+   (ou, caso você esteja utilizando uma IDE, como IntelliJ IDEA, a ferramenta geralmente oferece a opção de sincronizar as dependências automaticamente).
+
+4. **Criar um Controlador REST de Exemplo**
+
+   No pacote principal do projeto, adicione uma classe chamada `TestController` para verificar o funcionamento do Spring Web.
+
+   ```java
+   package br.upf.taskdeskbackend.controller;
+
+   import org.springframework.web.bind.annotation.GetMapping;
+   import org.springframework.web.bind.annotation.RequestMapping;
+   import org.springframework.web.bind.annotation.RestController;
+
+   @RestController
+   @RequestMapping("/api/test")
+   public class TestController {
+
+       @GetMapping
+       public String testEndpoint() {
+           return "Spring Web está configurado!";
+       }
+   }
+   ```
+
+5. **Executar o Projeto**
+
+   Execute o seguinte comando para iniciar o servidor Spring Boot:
+
+   ```bash
+   ./gradlew bootRun
+   ```
+
+   O servidor Spring Boot será iniciado em `http://localhost:8080` (a menos que o valor padrão da porta seja alterado).
+
+6. **Testar o Endpoint**
+
+   Abra um navegador ou uma ferramenta como Postman ou curl e acesse o seguinte endpoint para validar que o Spring Web está devidamente configurado:
+
+   ```bash
+   http://localhost:8080/api/test
+   ```
+
+   Você deverá receber a resposta: `Spring Web está configurado!`
+
+Com isso, o suporte ao Spring Web foi configurado com sucesso no projeto `taskdesk-backend`.
+
+=== Como Incluir e Configurar o Spring Boot Actuator no Projeto taskdesk-backend
+
+O Spring Boot Actuator fornece endpoints para monitorar e gerenciar a aplicação.
+Siga os passos abaixo para configurá-lo:
+
+1. **Adicionar a Dependência do Spring Boot Actuator**
+
+   No arquivo `build.gradle.kts`, adicione a dependência do Actuator no bloco `dependencies`:
+
+   ```kotlin
+   dependencies {
+       implementation("org.springframework.boot:spring-boot-starter-actuator")
+   }
+   ```
+
+2. **Atualizar as Dependências do Projeto**
+
+   Após adicionar a dependência, atualize as dependências executando o comando abaixo no terminal:
+
+   ```bash
+   ./gradlew build
+   ```
+
+   (Ou utilize a opção de sincronizar dependências na sua IDE).
+
+3. **Habilitar o Actuator no Arquivo `application.properties`**
+
+   Configure o arquivo `src/main/resources/application.properties` para habilitar e personalizar o Actuator:
+
+   ```properties
+   management.endpoints.web.exposure.include=*
+   management.endpoint.health.show-details=always
+   ```
+
+- `management.endpoints.web.exposure.include=*`: Isso expõe todos os endpoints do Actuator na aplicação.
+- `management.endpoint.health.show-details=always`: Exibe detalhes completos sobre o status de saúde da aplicação.
+
+4. **(Opcional) Proteger os Endpoints do Actuator**
+
+   Caso deseje proteger os endpoints, adicione a seguinte configuração no arquivo `application.properties`:
+
+   ```properties
+   management.security.enabled=true
+   ```
+
+   Você também precisará configurar a segurança utilizando Spring Security.
+
+5. **Testar os Endpoints do Actuator**
+
+   Execute o projeto com o comando:
+
+   ```bash
+   ./gradlew bootRun
+   ```
+
+   Os endpoints padrão estarão disponíveis em `http://localhost:8080/actuator`. Por exemplo:
+
+- `/actuator/health` para informações de saúde da aplicação.
+- `/actuator/info` para informações da aplicação (você pode configurar propriedades extras no mesmo endpoint).
+
+6. **Customizar os Endpoints do Actuator**
+
+   Para customizar o comportamento dos endpoints ou expor novos, edite o arquivo `application.properties` ou implemente os seus próprios componentes usando as interfaces do Spring Actuator.
+
+Com isso, o Spring Boot Actuator estará configurado e pronto para uso no projeto `taskdesk-backend`.
+
+7. **Executar e Testar o Projeto na IntelliJ IDEA**
+Caso esteja utilizando o IntelliJ IDEA como IDE, você pode executar o projeto diretamente nele:
+1. Certifique-se de que o projeto foi importado corretamente como um projeto Gradle.
+2. No painel lateral, abra a aba "Gradle" e localize a tarefa `bootRun` em `Tasks > application > bootRun`.
+3. Clique duas vezes em `bootRun` para iniciar o servidor Spring Boot.
+4. Após o servidor ser iniciado, teste no navegador ou em uma ferramenta como Postman o endpoint:
+```bash
+http://localhost:8080/api/test
+``` Você deverá receber a resposta esperada: `Spring Web está configurado!`.
+
+=== Configurando Docker Compose com PostgreSQL e PgAdmin no Projeto taskdesk-backend
+
+Siga os passos abaixo para configurar um ambiente Docker com PostgreSQL e PgAdmin para o projeto `taskdesk-backend`:
+
+1. **Criar o Arquivo docker-compose.yml**
+
+   Na raiz do projeto, crie um arquivo chamado `docker-compose.yml` com o seguinte conteúdo:
+
+   ```yaml
+   version: '3.8'
+
+   services:
+     postgres:
+       image: postgres:15.3
+       container_name: postgres-container
+       environment:
+         POSTGRES_USER: taskdesk_user
+         POSTGRES_PASSWORD: taskdesk_password
+         POSTGRES_DB: taskdesk_db
+       ports:
+         - "5432:5432"
+       volumes:
+         - postgres_data:/var/lib/postgresql/data
+       networks:
+         - taskdesk-network
+
+     pgadmin:
+       image: dpage/pgadmin4:7.7
+       container_name: pgadmin-container
+       environment:
+         PGADMIN_DEFAULT_EMAIL: admin@taskdesk.local
+         PGADMIN_DEFAULT_PASSWORD: admin
+       ports:
+         - "8081:80"
+       networks:
+         - taskdesk-network
+
+   volumes:
+     postgres_data:
+
+   networks:
+     taskdesk-network:
+   ```
+
+   Esse arquivo define dois serviços:
+
+- **PostgreSQL**: Banco de dados configurado como `taskdesk_db`, com usuário e senha personalizados.
+- **PgAdmin**: Interface gráfica para gerenciar o banco de dados PostgreSQL.
+
+2. **Atualizar as Dependências do Projeto**
+
+   Certifique-se de incluir a dependência do PostgreSQL no arquivo `build.gradle.kts`:
+
+   ```kotlin
+   dependencies {
+       implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+       runtimeOnly("org.postgresql:postgresql")
+   }
+   ```
+
+   Atualize as dependências do projeto executando:
+
+   ```bash
+   ./gradlew build
+   ```
+
+3. **Configurar o Banco de Dados no application.properties**
+
+   No arquivo `src/main/resources/application.properties`, defina as configurações do banco de dados PostgreSQL:
+
+   ```properties
+   spring.datasource.url=jdbc:postgresql://localhost:5432/taskdesk_db
+   spring.datasource.username=taskdesk_user
+   spring.datasource.password=taskdesk_password
+   spring.jpa.hibernate.ddl-auto=update
+   spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+   ```
+
+4. **Iniciar o Docker Compose**
+
+   No terminal, execute o seguinte comando para iniciar os serviços do Docker:
+
+   ```bash
+   docker-compose up -d
+   ```
+
+- O PostgreSQL estará acessível em `localhost:5432`.
+- O PgAdmin estará acessível em `http://localhost:8081`.
+Use as credenciais configuradas no `docker-compose.yml` para login:
+- Usuário: `admin@taskdesk.local`
+- Senha: `admin`
+
+5. **Acessar o PgAdmin e Configurar uma Conexão**
+
+   Após fazer login no PgAdmin:
+
+- Clique com o botão direito em "Servers" > "Create" > "Server".
+- No campo **Name**, insira um nome para o servidor (exemplo: `Taskdesk PostgreSQL`).
+- Na aba **Connection**, configure os campos:
+- **Host**: `postgres-container`
+- **Port**: `5432`
+- **Username**: `taskdesk_user`
+- **Password**: `taskdesk_password`
+
+   Clique em "Save" para salvar a nova conexão.
+
+6. **Testar a Conexão do Projeto ao PostgreSQL**
+
+   Execute o servidor Spring Boot com:
+
+   ```bash
+   ./gradlew bootRun
+   ```
+
+   O aplicativo deve se conectar automaticamente ao banco de dados PostgreSQL. Certifique-se de verificar os logs para confirmar a conexão bem-sucedida.
+
+7. **Encerrar os Contêineres**
+
+   Para encerrar o ambiente Docker, execute:
+
+   ```bash
+   docker-compose down
+   ```
+
+Com isso, o ambiente Docker com PostgreSQL e PgAdmin estará integrado ao seu projeto `taskdesk-backend`.
+
+
+image::03-docker-postgres.png[]
+
+
+=== Componentes Básicos
+
+Crie os componentes básicos da aplicação, como um componente para exibir a lista de chamados e outro para criar novos chamados.  Utilizaremos esses componentes nas próximas aulas.
+
+
+== Próximos Passos
+
+Com a arquitetura definida e o projeto configurado, estamos prontos para começar a implementar as funcionalidades do nosso Sistema de Controle de Chamados. Na próxima aula, vamos modelar o banco de dados e criar as entidades JPA.
+
+
+=== Componentes Básicos
+
+Crie os componentes básicos da aplicação, como um componente para exibir a lista de chamados e outro para criar novos chamados.  Utilizaremos esses componentes nas próximas aulas.
+
+
+== Próximos Passos
+
+Com a arquitetura definida e o projeto configurado, estamos prontos para começar a implementar as funcionalidades do nosso Sistema de Controle de Chamados. Na próxima aula, vamos modelar o banco de dados e criar as entidades JPA.
+
+= Aula 2: Arquitetura em Camadas e Configuração do Projeto
+
+Nesta aula, vamos aprofundar a estrutura do nosso projeto, definindo a arquitetura em camadas e configurando o Spring Boot e o React para trabalharmos de forma organizada e eficiente.
+
+== Arquitetura em Camadas
+
+A arquitetura em camadas é um padrão de design que organiza o código em camadas distintas, cada uma com responsabilidades específicas.  Isso promove a separação de conceitos, facilita a manutenção, reutilização de código e testes.  No nosso projeto, utilizaremos as seguintes camadas:
+
+* **Model (Modelo):** Representa as entidades do sistema (ex: Chamado, Usuário, Cliente). Define a estrutura dos dados e suas relações.
+* **Repository (Repositório):** Responsável pela persistência dos dados.  Faz a comunicação com o banco de dados, realizando operações de CRUD (Create, Read, Update, Delete).
+* **Service (Serviço):** Implementa a lógica de negócio do sistema.  Orquestra as operações entre os repositórios e outras camadas.
+* **Controller (Controlador):** Recebe as requisições do frontend, processa-as chamando os serviços e retorna as respostas.
+* **View (Visão - no frontend):** Responsável pela interface com o usuário. No nosso caso, será implementada com React.
+
+[plantuml]
+....
+package "View (React)" {
+
+}
+
+package "Controller (Spring)" {
+
+}
+
+package "Service (Spring)" {
+
+}
+
+package "Repository (Spring)" {
+
+}
+
+package "Model (Spring)" {
+
+}
+
+package "Banco de Dados" {
+
+}
+
+"View (React)" --> "Controller (Spring)"
+"Controller (Spring)" --> "Service (Spring)"
+"Service (Spring)" --> "Repository (Spring)"
+"Repository (Spring)" --> "Banco de Dados"
+"Service (Spring)" --> "Model (Spring)"
+"Repository (Spring)" --> "Model (Spring)"
+....
+
+
+== Configuração do Spring Boot
+
+=== Dependências do Projeto (pom.xml ou build.gradle)
+
+Verifique se as seguintes dependências estão incluídas no arquivo `pom.xml` (Maven) ou `build.gradle` (Gradle):
+
+[source,xml]
+----
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>runtime</scope>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+----
+
+=== Arquivo de Propriedades (application.properties ou application.yml)
+
+Configure as propriedades do Spring Boot, como conexão com o banco de dados, no arquivo `application.properties` (ou `application.yml`):
+
+[source,properties]
+----
+spring.datasource.url=jdbc:postgresql://localhost:5432/nome_do_seu_banco
+spring.datasource.username=seu_usuario
+spring.datasource.password=sua_senha
+spring.jpa.hibernate.ddl=update
+spring.jpa.show-sql=true
+----
+
+
+== Configuração do React
+
+=== Estrutura de Pastas
+
+Organize o projeto React em pastas para separar os componentes, serviços, estilos, etc. Uma sugestão de estrutura:
+Use code with caution.
+Adoc
+frontend/
+├── src/
+│ ├── components/
+│ │ ├── ChamadoForm.js
+│ │ ├── ChamadoList.js
+│ │ └── ...
+│ ├── services/
+│ │ ├── api.js
+│ │ └── ...
+│ ├── styles/
+│ │ ├── global.css
+│ │ └── ...
+│ ├── App.js
+│ ├── index.js
+│ └── ...
+└── ...
+
+=== Componentes Básicos
+
+Crie os componentes básicos da aplicação, como um componente para exibir a lista de chamados e outro para criar novos chamados.  Utilizaremos esses componentes nas próximas aulas.
+
+
+== Próximos Passos
+
+Com a arquitetura definida e o projeto configurado, estamos prontos para começar a implementar as funcionalidades do nosso Sistema de Controle de Chamados. Na próxima aula, vamos modelar o banco de dados e criar as entidades JPA.

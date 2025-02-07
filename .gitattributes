@@ -1,0 +1,18 @@
+# Force consistent line endings
+* text=auto
+
+# Define how files should be treated by Git
+*.md text
+*.adoc text
+*.sh eol=lf
+*.bat eol=crlf
+
+# Handle binary files (prevent Git from interpreting binary files as text)
+*.png binary
+*.jpg binary
+*.gif binary
+*.pdf binary
+
+# Better diffs for specific file types
+*.adoc diff=asciidoc
+*.html diff=html

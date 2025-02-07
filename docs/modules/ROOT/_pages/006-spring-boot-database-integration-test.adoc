@@ -1,0 +1,253 @@
+= Testes utilizando Spring Boot
+
+== Testes de integração com banco de dados
+
+Para testar a integração com o banco de dados, é necessário configurar um banco de dados em memória. O Spring Boot fornece suporte para o banco de dados H2, que é um banco de dados em memória. Para configurar o H2, adicione a dependência `com.h2database:h2` ao arquivo `pom.xml`. Também é possível configurar um banco de dados PostgreSQL para testes de integração. Nesse caso será necessário desabilitar a configuração automática do banco de dados e configurar manualmente o banco de dados para os testes.
+
+Inicialmente vamos incluir uma nova instância do banco de dados PostgreSQL no arquivo `docker-compose.yml` para ser utilizada nos testes de integração. A seguir, apresentamos um exemplo simplificado do arquivo `docker-compose.yml` com a nova instância do banco de dados PostgreSQL:
+
+[source,yaml]
+----
+  test-postgres:
+    image: postgres:17
+    container_name: test-db
+    environment:
+      POSTGRES_USER: springlab_user
+      POSTGRES_PASSWORD: springlab_password
+      POSTGRES_DB: springlab_test_db
+    ports:
+      - "5532:5432"
+    networks:
+      - springlab-network
+----
+
+No exemplo de `docker-compose.yml` fornecido, os parâmetros configuram um serviço PostgreSQL para testes de integração.   
+
+Depois, será necessário criar um novo perfil de configuração para os testes de integração. Para isso, crie um arquivo chamado `application-integration-test.yml` no diretório `src/test/resources` com o seguinte conteúdo:
+
+[source,yaml]
+----
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5532/springlab_test_db
+    username: springlab_user
+    password: springlab_password
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+----
+
+No arquivo de configuração `application-integration-test.yml`, configuramos o banco de dados PostgreSQL para os testes de integração. O perfil de configuração `integration-test` será ativado automaticamente quando os testes de integração forem executados.
+
+Agora, vamos criar uma classe de teste de integração para testar a integração com o banco de dados. Crie uma classe chamada `ProductRepositoryIntegrationTest` no diretório `src/test/java/com/example/demo/repository` com o seguintente conteúdo:
+
+[source,java]
+----
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class ProdutoRepositoryIntegrationTests {
+
+    @Autowired
+    private ProdutoRepository produtoRepository;
+
+    @Test
+    void shouldSaveProdutoToDatabase() {
+        // Arrange
+        Produto produto = new Produto(null, "Produto Teste", BigDecimal.valueOf(12.99), 10);
+
+        // Act
+        Produto savedProduto = produtoRepository.save(produto);
+
+        // Assert
+        assertThat(savedProduto.getId()).isNotNull();
+        assertThat(savedProduto.getNome()).isEqualTo("Produto Teste");
+        assertThat(savedProduto.getPreco()).isEqualTo(BigDecimal.valueOf(12.99));
+        assertThat(savedProduto.getEstoque()).isEqualTo(10);
+    }
+
+    @Test
+    void shouldFindProdutoById() {
+        // Arrange
+        Produto produto = new Produto(null, "Produto Teste", BigDecimal.valueOf(12.99), 10);
+        Produto savedProduto = produtoRepository.save(produto);
+
+        // Act
+        Optional<Produto> foundProduto = produtoRepository.findById(savedProduto.getId());
+
+        // Assert
+        assertThat(foundProduto).isPresent();
+        assertThat(foundProduto.get().getNome()).isEqualTo("Produto Teste");
+        assertThat(foundProduto.get().getPreco()).isEqualTo(BigDecimal.valueOf(12.99));
+        assertThat(foundProduto.get().getEstoque()).isEqualTo(10);
+    }
+
+    @Test
+    void shouldUpdateProdutoInDatabase() {
+        // Arrange
+        Produto produto = new Produto(null, "Produto Teste", BigDecimal.valueOf(12.99), 10);
+        Produto savedProduto = produtoRepository.save(produto);
+
+        // Act
+        savedProduto.setNome("Produto Atualizado");
+        savedProduto.setPreco(BigDecimal.valueOf(15.99));
+        savedProduto.setEstoque(20);
+        Produto updatedProduto = produtoRepository.save(savedProduto);
+
+        // Assert
+        assertThat(updatedProduto.getNome()).isEqualTo("Produto Atualizado");
+        assertThat(updatedProduto.getPreco()).isEqualTo(BigDecimal.valueOf(15.99));
+        assertThat(updatedProduto.getEstoque()).isEqualTo(20);
+    }
+
+    @Test
+    void shouldDeleteProdutoFromDatabase() {
+        // Arrange
+        Produto produto = new Produto(null, "Produto Teste", BigDecimal.valueOf(12.99), 10);
+        Produto savedProduto = produtoRepository.save(produto);
+
+        // Act
+        produtoRepository.deleteById(savedProduto.getId());
+        Optional<Produto> foundProduto = produtoRepository.findById(savedProduto.getId());
+
+        // Assert
+        assertThat(foundProduto).isEmpty();
+    }
+
+    @Test
+    void shouldFindAllProdutosFromDatabase() {
+        // Arrange
+        Produto produto1 = new Produto(null, "Produto 1", BigDecimal.valueOf(12.99), 10);
+        Produto produto2 = new Produto(null, "Produto 2", BigDecimal.valueOf(20.0), 5);
+
+        produtoRepository.save(produto1);
+        produtoRepository.save(produto2);
+
+        // Act
+        var produtos = produtoRepository.findAll();
+
+        // Assert
+        assertThat(produtos).hasSize(2);
+        assertThat(produtos).extracting("nome").containsExactlyInAnyOrder("Produto 1", "Produto 2");
+    }
+}
+----
+
+Lembre-se que o arquivo de propriedades `application-integration-test.yml` será carregado automaticamente quando os testes de integração forem executados. O perfil de configuração `integration-test` será ativado automaticamente quando os testes de integração forem executados. Ele possui precedência sobre o arquivo de propriedades `application.yml` e `application-test.yml`.
+
+A classe de teste `ProductRepositoryIntegrationTest` contém cinco métodos de teste para testar a integração com o banco de dados. Cada método de teste é responsável por testar uma operação específica do repositório de produtos, como salvar, atualizar, excluir e buscar produtos no banco de dados.
+
+== Anotações e Configurações da Classe
+
+- `@DataJpaTest`:
+O `@DataJpaTest` é uma anotação do Spring Boot usada para testes focados em JPA (Java Persistence API).
+Essa anotação configura o ambiente de teste para trabalhar com repositórios JPA, fornecendo os componentes necessários e reduzindo o escopo apenas para testes de persistência.
+Ele:
+* Configura um banco de dados H2 em memória por padrão.
+* Carrega apenas os componentes relacionados a JPA no contexto Spring.
+* Rola para trás as transações após cada teste, garantindo isolamento entre os testes.
+
+- `@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)`:
+Essa anotação modifica o comportamento padrão de `@DataJpaTest`, impedindo que o Spring substitua o banco de dados de teste pelo banco de dados H2 em memória.
+Ao definir `replace = AutoConfigureTestDatabase.Replace.NONE`, é possível usar o banco de dados real configurado no perfil ativo da aplicação.
+
+- `@Autowired`:
+A anotação `@Autowired` do Spring é usada para injetar automaticamente dependências no contexto do Spring.
+No caso, o Spring injetará uma instância do `ProdutoRepository` no campo `produtoRepository`.
+
+- `@Test`:
+Fornecida pelo JUnit 5, a anotação `@Test` indica que o método marcado deve ser executado como um teste unitário. Cada método anotado representa um caso de teste.
+
+- `@ActiveProfiles`:
+Embora não presente diretamente nos métodos de teste, a anotação `@ActiveProfiles` configurada em `ActiveProfiles` indica que um perfil específico pode ser usado durante os testes.
+Perfis permitem alternar configurações dependendo do ambiente (ex., `test`, `dev` ou `prod`).
+
+== Classe "ProdutoRepositoryIntegrationTests"
+
+A classe `ProdutoRepositoryIntegrationTests` é uma classe de testes de integração destinada a verificar a persistência de dados no banco de dados real ou em um banco de testes configurado. Ela utiliza o repositório `ProdutoRepository`, que é responsável por gerenciar a entidade `Produto`.
+
+== Estrutura Geral e Testes
+
+=== Campos
+
+- `ProdutoRepository produtoRepository`:
+* O `ProdutoRepository` é injetado no campo por meio de `@Autowired`.
+* Ele é utilizado nos testes para interagir com o banco de dados usando operações CRUD. O repositório segue o padrão do Spring Data JPA, oferecendo métodos como `save`, `findById` e `deleteById`.
+
+=== Métodos de Teste
+
+==== 1. `shouldSaveProdutoToDatabase()`
+
+Este teste verifica a operação de salvar uma entidade `Produto` no banco de dados.
+
+* `Produto produto = new Produto(...)`: Cria uma nova instância de `Produto`.
+* `produtoRepository.save(produto)`: Salva a entidade no banco de dados.
+* `assertThat(...)`: Usa o AssertJ para validar que:
+1. O ID do produto foi gerado pelo banco (não é `null`).
+2. As propriedades `nome`, `preco` e `estoque` foram armazenadas corretamente.
+
+**Objetivo**: Certificar que a operação de salvar funciona corretamente e que a JPA mapeia a entidade para o banco de dados adequadamente.
+
+==== 2. `shouldFindProdutoById()`
+
+Verifica a recuperação de uma entidade `Produto` pelo seu ID.
+
+* `produtoRepository.save(produto)`: Salva um `Produto` na base.
+* `produtoRepository.findById(...)`: Recupera o mesmo produto pelo ID gerado.
+* `assertThat(...)`: Certifica que:
+1. O resultado da consulta não é `null` (o produto existe no banco).
+2. Todos os valores das propriedades recuperadas são iguais aos valores salvos.
+
+**Objetivo**: Validar que o método `findById` recupera corretamente os dados do banco.
+
+==== 3. `shouldUpdateProdutoInDatabase()`
+
+Verifica a operação de atualização de uma entidade no banco.
+
+* Inicialmente, o `Produto` é salvo no banco usando `save`.
+* Os valores das propriedades do produto (nome, preço e estoque) são alterados.
+* `produtoRepository.save(...)`: Salva novamente o produto com as alterações.
+* `assertThat(...)`: Certifica que os valores atualizados foram persistidos no banco.
+
+**Objetivo**: Garantir que o método `save` do repositório atualiza corretamente uma entidade existente.
+
+==== 4. `shouldDeleteProdutoFromDatabase()`
+
+Testa a exclusão de uma entidade.
+
+* O produto é salvo no banco.
+* `produtoRepository.deleteById(...)`: Remove o produto pelo ID.
+* `produtoRepository.findById(...)`: Tenta buscar o produto removido.
+* `assertThat(foundProduto).isEmpty()`: Garante que o produto não existe mais no banco.
+
+**Objetivo**: Validar que o método `deleteById` remove adequadamente uma entidade.
+
+==== 5. `shouldFindAllProdutosFromDatabase()`
+
+Este teste verifica a funcionalidade de listar todas as entidades armazenadas no banco de dados.
+
+* Dois produtos são criados e salvos no banco.
+* `produtoRepository.findAll()`: Recupera todos os produtos.
+* `assertThat(produtos).hasSize(2)`: Certifica que o número de produtos recuperados é 2.
+* `assertThat(...).extracting("nome")...`: Garante que os nomes dos produtos recuperados estão corretos, independentemente da ordem.
+
+**Objetivo**: Validar que o método `findAll` retorna corretamente todos os registros armazenados.
+
+== Conceitos de Assertividade (AssertJ)
+
+Em todos os métodos de teste, é utilizado o *AssertJ* para garantir que as condições e verificações nos testes sejam atendidas. Exemplos:
+
+- `assertThat(...)`:
+* O ponto de partida para uma verificação.
+- `.isNotNull()`: Verifica se o valor não é nulo.
+- `.isEqualTo(...)`: Compara um campo ou valor específico com o esperado.
+- `.hasSize(...)`: Certifica que uma coleção tem um tamanho específico.
+- `.extracting(...)`: Permite verificar valores de uma ou mais propriedades de objetos dentro de coleções.
+
+== Considerações Finais
+
+A classe `ProdutoRepositoryIntegrationTests` foca em validar a correta integração entre a camada de persistência JPA e o banco de dados. Cada teste executa uma operação CRUD (Create, Read, Update, Delete) ou verifica consultas no banco, garantindo que a funcionalidade do repositório esteja implementada corretamente e em conformidade com os requisitos.
+

@@ -1,0 +1,322 @@
+= API REST com Spring Boot
+
+== Introdução
+
+O desenvolvimento de APIs REST é uma prática comum na construção de aplicações modernas. As APIs REST (Representational State Transfer) são um estilo de arquitetura de software que define um conjunto de restrições para a criação de serviços web. Elas são baseadas no protocolo HTTP e utilizam métodos padrão (GET, POST, PUT, DELETE) para realizar operações em recursos.
+
+O Spring Boot é um framework Java que facilita a criação de aplicações Spring, incluindo APIs REST. Ele fornece uma série de recursos e convenções que simplificam o desenvolvimento, permitindo que os desenvolvedores se concentrem na lógica de negócios em vez de configurações complexas.
+
+Neste tutorial, vamos explorar como criar uma API REST com Spring Boot. Vamos abordar desde a configuração inicial do projeto até a implementação de endpoints para operações CRUD (Create, Read, Update, Delete) em um recurso simples.
+
+== Criação do controlador
+
+O controlador é responsável por receber as requisições HTTP e direcioná-las para os serviços apropriados. Ele define os endpoints da API e as operações disponíveis para cada recurso.
+
+Vamos criar um controlador para o recurso "produto". Este controlador irá conter os endpoints para listar, criar, atualizar e excluir produtos.
+
+[source,java]
+----
+@RestController
+@RequestMapping("/api/produtos")
+public class ProdutoController {
+
+    private List<Produto> produtos = new ArrayList<>();
+    
+}
+----
+
+Vamos adicionar um método de inicialização para popular a lista de produtos com alguns exemplos.
+
+[source,java]
+----
+@RestController
+@RequestMapping("/api/produtos")
+public class ProdutoController {
+
+    private List<Produto> produtos = new ArrayList<>();
+
+    @PostConstruct
+    public void init() {
+        produtos.add(new Produto(1L, "Produto A", 100.0));
+        produtos.add(new Produto(2L, "Produto B", 200.0));
+        produtos.add(new Produto(3L, "Produto C", 300.0));
+    }
+}
+----
+
+A anotação `@PostConstruct` é utilizada para indicar que o método deve ser executado após a inicialização do bean. Neste caso, estamos populando a lista de produtos com alguns exemplos.
+
+Note que o estado dos produtos é mantido em memória, o que significa que os dados serão perdidos ao reiniciar a aplicação. Em um cenário real, os dados seriam armazenados em um banco de dados ou outro sistema de persistência.
+
+== Método GET
+
+O método GET é utilizado para recuperar informações de um recurso. Ele é seguro, ou seja, não deve alterar o estado do servidor. Em uma API REST, o método GET é comumente utilizado para buscar dados de um recurso específico ou de uma coleção de recursos.
+
+Vamos criar um endpoint que responde a requisições GET para o recurso "produto". Este endpoint irá retornar uma lista de produtos em formato JSON.
+
+[source,java]
+----
+@RestController
+@RequestMapping("/api/produtos")
+public class ProdutoController {
+
+    private List<Produto> produtos = new ArrayList<>();
+
+    @GetMapping
+    public List<Produto> getProdutos() {
+        return produtos;
+    }
+}
+----
+
+Ao executar o servidor e acessar o endpoint `http://localhost:8080/api/produtos`, você verá a lista de produtos retornada em formato JSON.
+
+[source,json]
+----
+[
+  {
+    "id": 1,
+    "nome": "Produto A",
+    "preco": 100.0,
+    "estoque": 10
+  },
+  {
+    "id": 2,
+    "nome": "Produto B",
+    "preco": 200.0,
+    "estoque": 20
+  },
+  {
+    "id": 3,
+    "nome": "Produto C",
+    "preco": 300.0,
+    "estoque": 5
+  }
+]
+----
+
+Vamos incluir novo método para buscar um produto específico por ID. Para isso, vamos adicionar um parâmetro `id` ao endpoint.
+
+[source,java]
+----
+@GetMapping("/{id}")
+public Produto getProdutoById(@PathVariable Long id) {
+    return produtos.stream()
+            .filter(produto -> produto.getId().equals(id))
+            .findFirst()
+            .orElse(null);
+}
+----
+
+Quando você acessar o endpoint `http://localhost:8080/api/produtos/1`, o produto com ID 1 será retornado em formato JSON.
+
+[source,json]
+----
+{
+  "id": 1,
+  "nome": "Produto A",
+  "preco": 100.0,
+  "estoque": 10
+}
+----
+
+== Método POST
+
+O método POST é utilizado para criar um novo recurso. Ele é idempotente, o que significa que a mesma requisição pode ser feita várias vezes sem efeitos colaterais. Em uma API REST, o método POST é comumente utilizado para adicionar um novo recurso a uma coleção.
+
+Vamos adicionar um endpoint que responde a requisições POST para o recurso "produto". Este endpoint irá criar um novo produto com base nos dados fornecidos no corpo da requisição.
+
+[source,java]
+----
+@PostMapping
+public Produto createProduto(@RequestBody Produto produto) {
+    produto.setId(nextId++);
+    produtos.add(produto);
+    return produto;
+}
+----
+
+Ao enviar uma requisição POST para o endpoint `http://localhost:8080/api/produtos` com um corpo JSON contendo os dados de um novo produto, o produto será criado e adicionado à lista.
+
+[source,json]
+----
+{
+  "nome": "Novo Produto",
+  "preco": 50.0,
+  "estoque": 15
+}
+----
+
+== Método DELETE
+
+O método DELETE é utilizado para remover um recurso existente. Ele é idempotente, o que significa que a mesma requisição pode ser feita várias vezes sem efeitos colaterais. Em uma API REST, o método DELETE é comumente utilizado para excluir um recurso específico.
+
+Vamos adicionar um endpoint que responde a requisições DELETE para o recurso "produto". Este endpoint irá excluir um produto com base no ID fornecido.
+
+[source,java]
+----
+@DeleteMapping("/{id}")
+public void deleteProduto(@PathVariable Long id) {
+    produtos.removeIf(produto -> produto.getId().equals(id));
+}
+----
+
+Ao enviar uma requisição DELETE para o endpoint `http://localhost:8080/api/produtos/1`, o produto com ID 1 será removido da lista.
+
+== Método PUT
+
+O método PUT é utilizado para atualizar um recurso existente. Ele é idempotente, o que significa que a mesma requisição pode ser feita várias vezes sem efeitos colaterais. Em uma API REST, o método PUT é comumente utilizado para modificar os dados de um recurso específico.
+
+Vamos adicionar um endpoint que responde a requisições PUT para o recurso "produto". Este endpoint irá atualizar um produto com base no ID fornecido e nos dados fornecidos no corpo da requisição.
+
+[source,java]
+----
+@PutMapping("/{id}")
+public Produto updateProduto(@PathVariable Long id, @RequestBody Produto produto) {
+    Produto produtoEncontrado = produtos.stream()
+            .filter(p -> p.getId().equals(id))
+            .findFirst()
+            .orElse(null);
+
+    if (produtoEncontrado != null) {
+        produtoEncontrado.setNome(produto.getNome());
+        produtoEncontrado.setPreco(produto.getPreco());
+        produtoEncontrado.setEstoque(produto.getEstoque());
+    }
+
+    return produtoEncontrado;
+}
+----
+
+Ao enviar uma requisição PUT para o endpoint `http://localhost:8080/api/produtos/1` com um corpo JSON contendo os dados atualizados de um produto, o produto com ID 1 será modificado de acordo.
+
+[source,json]
+----
+{
+  "nome": "Produto Atualizado",
+  "preco": 150.0,
+  "estoque": 8
+}
+----
+
+== Códigos de Status HTTP
+
+Os códigos de status HTTP são utilizados para indicar o resultado de uma requisição. Eles são divididos em cinco classes:
+
+* **1xx - Informacional:** Indica que a requisição foi recebida e está sendo processada.
+* **2xx - Sucesso:** Indica que a requisição foi bem-sucedida.
+* **3xx - Redirecionamento:** Indica que a requisição precisa ser redirecionada.
+* **4xx - Erro do Cliente:** Indica que houve um erro na requisição feita pelo cliente.
+* **5xx - Erro do Servidor:** Indica que houve um erro no servidor ao processar a requisição.
+
+Alguns códigos de status comuns são:
+
+* **200 OK:** Indica que a requisição foi bem-sucedida.
+* **201 Created:** Indica que um novo recurso foi criado.
+* **204 No Content:** Indica que a requisição foi bem-sucedida, mas não há conteúdo para retornar.
+* **400 Bad Request:** Indica que a requisição feita pelo cliente é inválida.
+* **404 Not Found:** Indica que o recurso solicitado não foi encontrado.
+* **500 Internal Server Error:** Indica que ocorreu um erro interno no servidor.
+
+Ao implementar os endpoints da API, é importante retornar os códigos de status apropriados para indicar o resultado da operação.
+
+Vamos modificar o controlador para retornar códigos de status HTTP apropriados em cada operação.
+
+[source,java]
+----
+@GetMapping
+public ResponseEntity<List<Produto>> getProdutos() {
+    return ResponseEntity.ok(produtos);
+}
+
+@GetMapping("/{id}")
+public ResponseEntity<Produto> getProdutoById(@PathVariable Long id) {
+    Produto produto = produtos.stream()
+            .filter(p -> p.getId().equals(id))
+            .findFirst()
+            .orElse(null);
+
+    if (produto != null) {
+        return ResponseEntity.ok(produto);
+    } else {
+        return ResponseEntity.notFound().build();
+    }
+}
+
+@PostMapping
+public ResponseEntity<Produto> createProduto(@RequestBody Produto produto) {
+    produto.setId(produtos.size() + 1L);
+    produtos.add(produto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(produto);
+}
+
+@DeleteMapping("/{id}")
+public ResponseEntity<Void> deleteProduto(@PathVariable Long id) {
+    boolean removed = produtos.removeIf(p -> p.getId().equals(id));
+
+    if (removed) {
+        return ResponseEntity.noContent().build();
+    } else {
+        return ResponseEntity.notFound().build();
+    }
+}
+
+@PutMapping("/{id}")
+public ResponseEntity<Produto> updateProduto(@PathVariable Long id, @RequestBody Produto produto) {
+    Produto produtoEncontrado = produtos.stream()
+            .filter(p -> p.getId().equals(id))
+            .findFirst()
+            .orElse(null);
+
+    if (produtoEncontrado != null) {
+        produtoEncontrado.setNome(produto.getNome());
+        produtoEncontrado.setPreco(produto.getPreco());
+        produtoEncontrado.setEstoque(produto.getEstoque());
+        return ResponseEntity.ok(produtoEncontrado);
+    } else {
+        return ResponseEntity.notFound().build();
+    }
+}
+----
+
+A classe ResponseEntity do Spring permite retornar uma resposta HTTP com um corpo e um código de status específico. Ao utilizar a classe ResponseEntity, podemos personalizar a resposta de acordo com o resultado da operação.
+
+== Método PATCH
+
+O método PATCH é utilizado para atualizar parcialmente um recurso existente. Ele é idempotente, o que significa que a mesma requisição pode ser feita várias vezes sem efeitos colaterais. Em uma API REST, o método PATCH é comumente utilizado para modificar apenas parte dos dados de um recurso.
+
+Vamos adicionar um endpoint que responde a requisições PATCH para o recurso "produto". Este endpoint irá atualizar parcialmente um produto com base no ID fornecido e nos dados fornecidos no corpo da requisição.
+
+[source,java]
+----
+@PatchMapping("/{id}")
+public ResponseEntity<Produto> patchProduto(@PathVariable Long id, @RequestBody Map<String, Object> fields) {
+    Produto produtoEncontrado = produtos.stream()
+            .filter(p -> p.getId().equals(id))
+            .findFirst()
+            .orElse(null);
+
+    if (produtoEncontrado != null) {
+        fields.forEach((key, value) -> {
+            switch (key) {
+                case "nome":
+                    produtoEncontrado.setNome((String) value);
+                    break;
+                case "preco":
+                    produtoEncontrado.setPreco((Double) value);
+                    break;
+                case "estoque":
+                    produtoEncontrado.setEstoque((Integer) value);
+                    break;
+            }
+        });
+
+        return ResponseEntity.ok(produtoEncontrado);
+    } else {
+        return ResponseEntity.notFound().build();
+    }
+}
+----
+
+Note que o método PATCH aceita um corpo JSON contendo um mapa de campos e valores a serem atualizados. Ele percorre os campos fornecidos e atualiza o produto parcialmente de acordo. A anotação @RequestBody Map<String, Object> fields permite receber um corpo JSON dinâmico com campos variáveis. Esses campos são mapeados para um mapa de strings e objetos, facilitando a atualização parcial do recurso. No corpo do método, um switch-case é utilizado para identificar os campos a serem atualizados e aplicar as modificações no produto. Apenas os campos fornecidos no corpo da requisição serão atualizados, mantendo os demais campos inalterados.
+

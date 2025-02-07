@@ -1,0 +1,297 @@
+= Banco de Dados e Spring Boot
+
+== Introdução
+
+O Spring Boot é uma ferramenta poderosa para o desenvolvimento de aplicativos Java. Ele fornece uma maneira rápida e fácil de criar aplicativos prontos para produção. No entanto, a maioria dos aplicativos modernos precisa de um banco de dados para armazenar e recuperar dados. Neste tutorial, você aprenderá como integrar um banco de dados PostgreSQL a um aplicativo Spring Boot.
+
+== Configuração do Banco de Dados
+
+Para que o Spring Boot se conecte a um banco de dados PostgreSQL utilizando o Hibernate, você precisa adicionar a dependência `spring-boot-starter-data-jpa` ao arquivo `build.gradle` do seu projeto. Abaixo está um exemplo de como adicionar a dependência ao arquivo `build.gradle`:
+
+[source,kotlin]
+----
+implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+----
+
+Além disso, você precisa configurar as propriedades do banco de dados no arquivo `application.properties` do seu projeto. Abaixo está um exemplo de como configurar as propriedades do banco de dados no arquivo `application.properties`:
+
+[source,properties]
+----
+spring.datasource.url=jdbc:postgresql://localhost:5432/springlab_db
+spring.datasource.username=springlab_user
+spring.datasource.password=springlab_password
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=update
+----
+
+Neste exemplo, as propriedades configuram a URL do banco de dados, o nome de usuário, a senha, o driver JDBC e a plataforma de banco de dados. Além disso, a propriedade `spring.jpa.hibernate.ddl-auto` define a estratégia de criação do banco de dados. No caso, a estratégia `update` é utilizada para atualizar o banco de dados automaticamente.
+
+Além disso, é necessário incluir o driver JDBC do PostgreSQL no arquivo `build.gradle` do seu projeto. Abaixo está um exemplo de como adicionar a dependência ao arquivo `build.gradle`:
+
+[source,kotlin]
+----
+runtime("org.postgresql:postgresql")
+----
+
+O driver somente é necessário quando a aplicação é executada. Portanto, a dependência é adicionada como `runtime`.
+
+== Criando uma Entidade
+
+Vamos transformar a classe `Produto` em uma entidade JPA para que ela possa ser persistida no banco de dados. Para isso, você precisa adicionar a anotação `@Entity` à classe e a anotação `@Id` à propriedade que será a chave primária. Abaixo está um exemplo de como transformar a classe `Produto` em uma entidade JPA:
+
+[source,java]
+----
+class Produto {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
+    String nome;
+    BigDecimal preco;
+
+    // Código omitido para simplificar o exemplo
+}
+----
+
+Neste exemplo, a propriedade `id` é marcada com a anotação `@Id` para indicar que ela é a chave primária da entidade. Além disso, a anotação `@GeneratedValue` é utilizada para especificar a estratégia de geração de valores para a chave primária. Nessse caso, a estratégia `IDENTITY` é utilizada para que o banco de dados gere automaticamente os valores da chave primária.
+
+== Criando um Repositório
+
+O framework Spring Data JPA fornece uma maneira fácil de criar repositórios para interagir com o banco de dados. Para criar um repositório para a entidade `Produto`, você precisa criar uma interface que estenda a interface `JpaRepository`. Abaixo está um exemplo de como criar um repositório para a entidade `Produto`:
+
+[source,java]
+----
+@Repository
+interface ProdutoRepository extends JpaRepository<Produto, Integer> {
+    
+}
+----
+
+Neste exemplo, a interface `ProdutoRepository` estende a interface `JpaRepository` e define a entidade `Produto` e o tipo da chave primária como argumentos genéricos. Com isso, o Spring Data JPA fornece métodos para salvar, atualizar, excluir e recuperar entidades do banco de dados.
+
+Os principais métodos fornecidos pelo `JpaRepository` são:
+
+- `save()`: Salva uma entidade no banco de dados.
+- `findById()`: Recupera uma entidade pelo ID.
+- `findAll()`: Recupera todas as entidades.
+- `delete()`: Exclui uma entidade do banco de dados.
+
+Além disso, métodos personalizados podem ser definidos na interface do repositório e implementados pelo Spring Data JPA automaticamente.
+
+== Criando um Serviço
+
+Para encapsular a lógica de negócio relacionada à entidade `Produto`, você pode criar um serviço que interaja com o repositório `ProdutoRepository`. Abaixo está um exemplo de como criar um serviço para a entidade `Produto`:
+
+[source,java]
+----
+@Service
+class ProdutoService {
+    private final ProdutoRepository produtoRepository;
+
+    @Autowired
+    ProdutoService(ProdutoRepository produtoRepository) {
+        this.produtoRepository = produtoRepository;
+    }
+
+    public Produto salvarProduto(Produto produto) {
+        return produtoRepository.save(produto);
+    }
+
+    public List<Produto> listarProdutos() {
+        return produtoRepository.findAll();
+    }
+
+    // Outros métodos omitidos para simplificar o exemplo
+}
+----
+
+Neste exemplo, a classe `ProdutoService` é marcada com a anotação `@Service` para indicar que ela é um componente de serviço do Spring. Além disso, o construtor da classe recebe uma instância do repositório `ProdutoRepository` como argumento e a armazena em um campo de instância.
+
+O serviço `ProdutoService` fornece métodos para salvar e listar produtos. O método `salvarProduto()` salva um produto no banco de dados, enquanto o método `listarProdutos()` recupera todos os produtos do banco de dados.
+
+== Modificando o Controlador de Produtos
+
+Para utilizar o serviço `ProdutoService` no controlador de produtos, você precisa injetar uma instância do serviço no controlador. Abaixo está um exemplo de como modificar o controlador de produtos para utilizar o serviço `ProdutoService`:
+
+[source,java]
+----
+@RestController
+@RequestMapping("/api/produtos")
+public class ProdutoController {
+
+    private final ProdutoService produtoService;
+    
+    public ProdutoController(ProdutoService produtoService) {
+        this.produtoService = produtoService;
+    }
+
+        // Outros métodos omitidos para simplificar o exemplo
+}
+----
+
+Neste exemplo, a classe `ProdutoController` recebe uma instância do serviço `ProdutoService` no construtor e a armazena em um campo de instância. Com isso, o controlador de produtos pode utilizar os métodos do serviço para salvar e listar produtos.
+
+Vamos incluir também um método inicializar o banco de dados com alguns produtos. Abaixo está um exemplo para criar um CommandLineRunner que insere alguns produtos no banco de dados apenas uma vez. Esse método inicialmente verifica se o banco de dados está vazio e, se estiver, insere os produtos.
+
+[source,java]
+----
+@Component
+public class DatabaseInitializer implements CommandLineRunner {
+
+    private final ProdutoService produtoService;
+
+    public DatabaseInitializer(ProdutoService produtoService) {
+        this.produtoService = produtoService;
+    }
+
+    @Override
+    public void run(String... args) {
+        if (produtoService.listarProdutos().isEmpty()) {
+            Produto produto1 = new Produto("Produto 1", new BigDecimal("100.00"));
+            Produto produto2 = new Produto("Produto 2", new BigDecimal("200.00"));
+            Produto produto3 = new Produto("Produto 3", new BigDecimal("300.00"));
+
+            produtoService.salvarProduto(produto1);
+            produtoService.salvarProduto(produto2);
+            produtoService.salvarProduto(produto3);
+        }
+    }
+}
+----
+
+Com essas alterações, a lista de produtos e a variável nextId não são mais necessárias. O controlador de produtos agora utiliza o serviço ProdutoService para salvar e listar produtos, e o CommandLineRunner DatabaseInitializer é responsável por inicializar o banco de dados com alguns produtos.
+
+== Alterando os Métodos do Controlador para Utilizar o Serviço
+
+Agora que o serviço `ProdutoService` foi criado, você pode modificar os métodos do controlador de produtos para utilizar o serviço. Abaixo está um exemplo de como modificar os métodos do controlador para utilizar o serviço:
+
+[source,java]
+----
+@RestController
+@RequestMapping("/api/produtos")
+public class ProdutoController {
+
+    private final ProdutoService produtoService;
+
+    public ProdutoController(ProdutoService produtoService) {
+        this.produtoService = produtoService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Produto>> getProdutos() {
+        List<Produto> produtos = produtoService.listarProdutos();
+        return ResponseEntity.ok(produtos);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Produto> getProdutoById(@PathVariable Long id) {
+        Produto produto = produtoService.buscarProdutoPorId(id); // Assumindo que método existe no service
+        if (produto != null) {
+            return ResponseEntity.ok(produto);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<Produto> createProduto(@RequestBody Produto produto) {
+        Produto produtoSalvo = produtoService.salvarProduto(produto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(produtoSalvo);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduto(@PathVariable Long id) {
+        boolean removed = produtoService.deletarProduto(id); // Assumindo que método existe no service
+
+        if (removed) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Produto> updateProduto(@PathVariable Long id, @RequestBody Produto produto) {
+        Produto produtoAtualizado = produtoService.atualizarProduto(id, produto); // Assumindo que método existe no service
+        if (produtoAtualizado != null) {
+            return ResponseEntity.ok(produtoAtualizado);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Produto> patchProduto(@PathVariable Long id, @RequestBody Map<String, Object> fields) {
+        Produto produtoAtualizado = produtoService.atualizarParcialProduto(id, fields); // Assumindo que método existe no service
+        if (produtoAtualizado != null) {
+            return ResponseEntity.ok(produtoAtualizado);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
+----
+
+[source,java]
+----
+@Service
+class ProdutoService {
+    private final ProdutoRepository produtoRepository;
+
+    ProdutoService(ProdutoRepository produtoRepository) {
+        this.produtoRepository = produtoRepository;
+    }
+
+    public Produto salvarProduto(Produto produto) {
+        return produtoRepository.save(produto);
+    }
+
+    public List<Produto> listarProdutos() {
+        return produtoRepository.findAll();
+    }
+
+    public Produto buscarProdutoPorId(Long id) {
+        return produtoRepository.findById(id).orElse(null);
+    }
+
+    public boolean deletarProduto(Long id) {
+        if (produtoRepository.existsById(id)) {
+            produtoRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    public Produto atualizarProduto(Long id, Produto produto) {
+        if (produtoRepository.existsById(id)) {
+            produto.setId(id);
+            return produtoRepository.save(produto);
+        }
+        return null;
+    }
+
+    public Produto atualizarParcialProduto(Long id, Map<String, Object> fields) {
+        Produto produto = produtoRepository.findById(id).orElse(null);
+        if (produto != null) {
+            fields.forEach((key, value) -> {
+                switch (key) {
+                    case "nome":
+                        produto.setNome((String) value);
+                        break;
+                    case "preco":
+                        produto.setPreco((Double) value);
+                        break;
+                    case "estoque":
+                        produto.setEstoque((Integer) value);
+                        break;
+                }
+            });
+            return produtoRepository.save(produto);
+        }
+        return null;
+    }
+}
+----
+
+Note que a lógica de atualização parcial foi movida para o serviço `ProdutoService`. O método `atualizarParcialProduto()` recebe um mapa de campos e valores a serem atualizados e atualiza apenas os campos especificados. Além disso, o método `buscarProdutoPorId()` foi adicionado ao serviço para buscar um produto pelo ID.
+

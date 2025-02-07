@@ -1,0 +1,198 @@
+= APIs e o Paradigma REST
+
+Este capítulo tem como objetivo apresentar os fundamentos das APIs (Application Programming Interfaces) com foco no estilo arquitetônico REST (Representational State Transfer), amplamente utilizado no desenvolvimento de sistemas distribuídos. APIs RESTful são projetadas para facilitar a comunicação entre diferentes sistemas ao promover simplicidade, escalabilidade e interoperabilidade. Além disso, abordaremos o papel essencial do protocolo HTTP (Hypertext Transfer Protocol) como base para a interação entre cliente e servidor, destacando métodos, códigos de status e boas práticas no design de APIs.
+
+== Um Pouco de História: a Origem do REST
+
+O REST (Representational State Transfer) foi introduzido oficialmente em 2000, no trabalho acadêmico de Roy Fielding em sua tese de doutorado na Universidade da Califórnia, Irvine. Fielding, que também foi um dos principais autores da especificação do HTTP, buscava resolver problemas recorrentes no design de sistemas distribuídos, propondo um estilo arquitetônico que promovesse maior simplicidade, escalabilidade e facilidade de integração entre sistemas heterogêneos.
+
+A motivação para o desenvolvimento do paradigma REST surgiu da observação de arquiteturas utilizadas na World Wide Web, que haviam demonstrado grande sucesso em termos de escalabilidade e resiliência. Fielding analisou esses padrões e extraiu um conjunto de princípios arquitetônicos, como o uso de recursos identificáveis por URLs, o estado independente das interações (*statelessness*) e o uso de interfaces uniformes. Esses princípios foram consolidados no REST, formando uma base para a criação de sistemas web mais eficientes e interoperáveis.
+
+Desde então, o REST se tornou um padrão de fato para a construção de APIs, especialmente com o crescimento da internet e a necessidade crescente de que sistemas de diferentes tecnologias se comuniquem entre si. Sua popularidade tem sido impulsionada justamente pela simplicidade de seu modelo e pela aderência ao protocolo HTTP, que já era amplamente utilizado na web.
+
+== HTTP: A Base da Comunicação na Web
+
+O HTTP (Hypertext Transfer Protocol) é um protocolo de comunicação que funciona como a espinha dorsal da interação entre cliente e servidor no contexto de APIs RESTful. Ele define como as solicitações e respostas são formatadas, permitindo a troca eficiente de informações.
+
+=== A Estrutura de uma Mensagem HTTP
+
+Uma comunicação HTTP é composta por mensagens que seguem uma estrutura definida, sendo classificadas em dois tipos: **requisições** (solicitações enviadas do cliente para o servidor) e **respostas** (retornadas pelo servidor ao cliente). Ambas contêm os seguintes componentes principais:
+
+1. **Linha Inicial:**
+- Para requisições, contém o método HTTP (ex., GET, POST), o caminho (URI) do recurso e a versão do protocolo.
+- Para respostas, contém a versão do protocolo, o código de status e a frase associada ao código (ex., `200 OK`).
+
+2. **Cabeçalhos (_Headers_):** Os cabeçalhos HTTP são usados para transmitir informações adicionais sobre a mensagem, como tipo de conteúdo, autenticação, ou controle de _cache_. Exemplos incluem:
+- `Content-Type`: Especifica o tipo de mídia do corpo da mensagem (ex., `application/json`).
+- `Authorization`: Envia credenciais para autenticação.
+- `Accept`: Define os formatos de resposta esperados pelo cliente.
+
+3. **Corpo (_Body_):**
+- Opcional, contém os dados da requisição ou resposta propriamente dita, sendo mais comum em métodos como POST e PUT.
+
+4. **Linhas em Branco:**
+- Uma linha em branco separa os _headers_ do corpo da mensagem.
+
+Exemplo de requisição e resposta HTTP em formato simplificado:
+
+``` 
+GET /recursos/123 HTTP/1.1
+Host: api.example.com
+Authorization: Bearer <token>
+```
+
+```
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 123
+
+{
+  "id": 123,
+  "name": "Exemplo de Recurso",
+  "description": "Este é um exemplo de resposta de recurso em uma API RESTful.",
+  "status": "active"
+}
+```
+
+=== Métodos HTTP: Funções Fundamentais
+Os métodos HTTP formam a base para a manipulação de recursos em APIs RESTful, cada um deles mapeando a uma ação específica. Vamos aprofundar suas características:
+
+- **GET:** Utilizado para recuperar dados sem causar quaisquer alterações no estado do servidor. É idempotente, isto é, realizar múltiplas requisições GET para o mesmo recurso deve sempre retornar o mesmo resultado, desde que os dados no servidor não tenham mudado.
+
+- **POST:** Indicado para a criação de novos recursos. Os dados são enviados no corpo da requisição para que o servidor processe e adicione os novos recursos ao sistema. É **não idempotente**, ou seja, múltiplas requisições podem causar efeitos colaterais (por exemplo, criar múltiplas instâncias de um mesmo item).
+
+- **PUT:** Usado para atualizar um recurso existente de forma completa ou criar um novo recurso _se_ ele não existir. Sua idempotência garante que chamadas repetidas resultam sempre no mesmo estado do recurso.
+
+- **DELETE:** Serve para remover recursos identificados por um URI. Seguindo a definição RESTful, o DELETE também é idempotente: múltiplas requisições para o mesmo recurso retornam o mesmo efeito após a exclusão bem-sucedida.
+
+- **PATCH:** Não mencionado no material base, mas igualmente relevante, o PATCH é utilizado para realizar atualizações **parciais** em um recurso, ao invés de substituir todo o estado como no PUT.
+
+=== Códigos de Status HTTP: Detalhes e Categorias
+Os códigos de status são fundamentais para expressar o resultado de uma requisição HTTP. Eles são numerados em diferentes faixas que permitem identificar rapidamente a categoria do retorno:
+
+=== 1xx – Informacional
+
+Incluem respostas provisórias, indicam que a solicitação foi *recebida e está em processamento*, mas não há informações conclusivas ainda.
+Um cenário de uso comum pode ocorrer quando o servidor solicita que o cliente continue enviando uma requisição de múltiplas partes.
+
+[cols="1,5",options="header"]
+|=== 
+| **Código** | **Descrição**
+| 100 | Continue - Solicitação aceita; o cliente pode continuar.
+| 101 | Switching Protocols - Mudança de protocolo conforme requisitado.
+|===
+
+=== **2xx – Sucesso**
+
+Indicam que a requisição foi *bem-sucedida* e que o resultado esperado foi retornado com sucesso. Um `200 OK` é usado quando um recurso é recuperado com sucesso, enquanto `201 Created` é utilizado quando um novo recurso é criado com êxito.
+
+[cols="1,5",options="header"]
+|===
+| **Código** | **Descrição**
+| 200 | OK - Requisição processada com sucesso.
+| 201 | Created - Recurso criado no servidor.
+| 202 | Accepted - Requisição aceita, mas ainda pendente.
+| 204 | No Content - Sucesso sem corpo na resposta.
+|===
+
+=== **3xx – Redirecionamento**
+
+Indicam que o cliente precisa realizar uma nova requisição para completar a operação. A nova URL ou localização do recurso pode ser informada no cabeçalho de resposta `Location`. Um `301 Moved Permanently` é frequentemente usado para indicar que um recurso foi movido para outra URL.
+
+[cols="1,5",options="header"]
+|===
+| **Código** | **Descrição**
+| 301 | Moved Permanently - O recurso foi movido para outro local permanentemente.
+| 302 | Found - O recurso foi encontrado, mas em outro local temporário.
+| 304 | Not Modified - Não há alteração no recurso em relação à última consulta.
+|===
+
+=== **4xx – Erros do Cliente**
+Representam falhas causadas por erros no lado do cliente, como requisições malformadas ou tentativas de acesso não autorizado. Um erro `400 Bad Request` ocorre quando a entrada do cliente não pode ser processada devido a má formatação, enquanto um `404 Not Found` indica que o recurso solicitado não foi encontrado no servidor.
+
+[cols="1,5",options="header"]
+|===
+| **Código** | **Descrição**
+| 400 | Bad Request - Erro na sintaxe da requisição.
+| 401 | Unauthorized - Autenticação requerida.
+| 403 | Forbidden - Acesso ao recurso negado.
+| 404 | Not Found - O recurso solicitado não existe.
+|===
+
+=== **5xx – Erros do Servidor**
+
+Apontam problemas no servidor ao tentar processar uma requisição válida oriunda do cliente. Esses erros indicam que o problema está no backend e requer atenção do desenvolvedor ou da equipe de infraestrutura. Um `500 Internal Server Error` indica um erro genérico no servidor, enquanto `503 Service Unavailable` sinaliza indisponibilidade temporária.
+
+[cols="1,5",options="header"]
+|===
+| **Código** | **Descrição**
+| 500 | Internal Server Error - Erro inesperado no servidor.
+| 502 | Bad Gateway - Resposta inválida de um servidor intermediário.
+| 503 | Service Unavailable - Serviço indisponível.
+| 504 | Gateway Timeout - Tempo limite ao aguardar resposta.
+|===
+
+=== Segurança no HTTP
+Com a popularização do HTTP e o surgimento de APIs RESTful, surgiram também preocupações associadas à segurança. Para mitigar riscos, o HTTP pode ser combinado com extensões e boas práticas, como:
+
+- **HTTPS (Hypertext Transfer Protocol Secure):** Garantia de comunicação segura pela encriptação dos dados transmitidos entre cliente e servidor utilizando SSL/TLS.
+- **Autenticação e Autorização:**
+* Cabeçalhos como `Authorization` são usados para transmitir credenciais.
+* Práticas como o uso de _JSON Web Tokens (JWT)_ e _OAuth_ tornaram-se padrões de mercado.
+
+- **CORS (Cross-Origin Resource Sharing):** Implementado para controle de requisições entre domínios diferentes, o CORS é configurado para evitar acessos indesejados a recursos.
+
+== REST: Um Estilo Arquitetônico para APIs
+
+O REST é um estilo arquitetônico que define um conjunto de restrições que, quando seguidas corretamente, resultam em arquiteturas escaláveis, flexíveis e bem organizadas para APIs. A ideia central do REST é tratar os recursos como entidades identificáveis e manipuláveis por meio de métodos HTTP e URLs. Esse paradigma permite que sistemas distribuídos sejam conectados de maneira padronizada, otimizando a comunicação e promovendo a interoperabilidade.
+
+=== Características Fundamentais das APIs RESTful
+
+As APIs RESTful possuem características que estabelecem seu diferencial e importância no desenvolvimento moderno de aplicações distribuídas:
+
+* *Stateless:* Cada requisição enviada do cliente ao servidor deve ser independente, ou seja, o servidor não mantém estado entre diversas interações. Todas as informações necessárias para processar a requisição, como credenciais e identificadores, devem estar contidas na própria mensagem.
+* *Uso de HTTP:* APIs RESTful aproveitam os métodos (verbos) do protocolo HTTP (GET, POST, PUT, DELETE) para expressar operações específicas sobre os recursos.
+* *Recursos Representados por URLs:* Cada recurso é representado por uma URL única, que identifica a localização das entidades no servidor. Exemplos de recursos incluem clientes, produtos ou pedidos.
+* *Retorno em Formatos Padronizados:* A troca de informações frequentemente ocorre por meio do formato JSON (JavaScript Object Notation), leve e amplamente aceito no mercado. Outros formatos, como XML e YAML, também podem ser utilizados dependendo do caso de uso.
+
+=== Boas Práticas no Design de APIs RESTful
+
+Ao projetar uma API RESTful, é importante ter em mente algumas boas práticas para garantir que o sistema seja robusto e fácil de usar:
+
+1. **Consistência nos Endpoints:** Utilize nomenclaturas padronizadas baseadas em substantivos para descrever os recursos (ex.: `/users`, `/products`, `/orders`).
+2. **Uso Adequado dos métodos HTTP:** Mapeie corretamente as operações aos métodos HTTP. Por exemplo, utilize `GET` para recuperação, `POST` para criação, `PUT` para atualização e `DELETE` para remoção.
+3. **Códigos de Status HTTP Precisos:** Os retornos da API devem incluir códigos de status que representem precisamente o que ocorreu com a requisição. Por exemplo:
+* *200 OK*: Significa que a requisição foi bem-sucedida.
+* *201 Created*: Indica que um novo recurso foi criado.
+* *400 Bad Request*: Requisição inválida devido a um erro do cliente.
+* *404 Not Found*: Recurso solicitado não encontrado.
+* *500 Internal Server Error*: Indica falha inesperada no servidor.
+4. **Documentação Eficiente:** Uma API deve ser bem documentada utilizando ferramentas como Swagger ou Postman, para que desenvolvedores sejam capazes de entender e interagir com facilidade.
+
+=== Relação dos Métodos HTTP e a Semântica
+
+A tabela abaixo demonstra a relação entre os métodos HTTP (GET, POST, PUT, DELETE) e as operações realizadas em diferentes **endpoints** para um sistema de gerenciamento de pesquisas (_surveys_). Cada método é aplicado em conformidade com sua semântica, detalhando como os recursos podem ser manipulados.
+
+[cols="1,1,1,1,1", options="header"]
+|===
+| Recurso Endpoint URL | GET | POST | PUT | DELETE
+| `/surveys` | Retornar todas as pesquisas | Criar uma nova pesquisa | Atualizar em massa pesquisas (_não recomendado_) | Remover todas as pesquisas (_não recomendado_) 
+| `/surveys/123` | Retornar os detalhes da pesquisa 123 | Erro | Atualizar os detalhes da pesquisa 123, se ela existir | Remover a pesquisa 123 
+| `/surveys/123/responses` | Retornar todas as respostas da pesquisa 123 | Criar uma nova resposta para a pesquisa 123 | Atualizar em massa respostas da pesquisa 123 (_não recomendado_) | Remover todas as respostas da pesquisa 123 (_não recomendado_) 
+| `/responses/42` | Retornar os detalhes da resposta 42 | Erro | Atualizar os detalhes da resposta 42, se ela existir | Remover a resposta 42 
+|===
+
+[NOTE]
+.Observações Importantes:
+====
+**Erro nos Métodos:** O uso do `POST` para endpoints como `/surveys/123` ou `/responses/42` resulta em erro, pois a semântica do método POST não prevê essa operação para atualizar ou interagir diretamente com objetos expressamente identificados.
+
+**Atualizações em Massa:** Operações em massa como `PUT` ou `DELETE` para coleções inteiras (exemplo: `/surveys`) são possíveis, mas **não recomendadas** por diversos motivos, como potencial perda de dados críticos ou inconsistência no estado do sistema.
+
+**Boas Práticas RESTful:** Cada método deve ser utilizado de forma estrita de acordo com sua semântica original. Isso promove maior aderência aos princípios REST e facilita a compreensão por consumidores da API.
+====
+
+== Considerações Finais
+
+Compreender os fundamentos do estilo REST e do protocolo HTTP é essencial para o desenvolvimento de APIs modernas e eficientes, que são a base de grande parte das arquiteturas de software atuais. Do design adequado ao retorno de códigos de status claros e informativos, uma boa API RESTful promove a interoperabilidade entre sistemas, simplifica o consumo por parte de clientes e serviços, e contribui para a escalabilidade das soluções.

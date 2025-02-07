@@ -1,0 +1,23 @@
+{
+  "name": "fullstack-spring-react-course",
+  "description": "Fullstack Spring and React Courseware",
+  "author": {
+    "name": "Diego Inácio Patricio",
+    "email": "diegopatr@gmail.com",
+    "url": "https://github.com/diegopatr"
+  },
+  "scripts": {
+    "build": "antora antora-playbook.yml",
+    "serve": "browser-sync start --server build/site --files 'build/site' --port 5000 --no-notify --no-open",
+    "watch": "chokidar 'docs/**/*' -c 'pnpm run build'",
+    "start": "concurrently \"pnpm run serve\" \"pnpm run watch\""
+  },
+  "devDependencies": {
+    "@antora/cli": "^3.1.10",
+    "antora": "^3.1.10",
+    "browser-sync": "^3.0.3",
+    "chokidar-cli": "^3.0.0",
+    "concurrently": "^9.1.2",
+    "dotenv": "^16.4.7"
+  }
+}

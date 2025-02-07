@@ -1,0 +1,293 @@
+### Tutorial: Integração de uma Aplicação Next.js com uma API REST Usando TypeScript
+
+Este tutorial guiará você passo a passo na criação de uma aplicação Next.js que consome dados de uma API REST externa. Usaremos uma API dummy (https://jsonplaceholder.typicode.com) para fins de demonstração. Certifique-se de ter o seguinte ambiente configurado:
+
+- **Node.js** 16 ou superior.
+- **Next.js** 13 ou superior (com suporte ao App Directory).
+- **TypeScript** instalado no projeto.
+- **TailwindCSS** (opcional, mas usaremos para estilo básico).
+
+### Estrutura do Projeto
+Aqui está uma visão geral da estrutura do projeto após criarmos os componentes e arquivos necessários:
+
+```
+./
+├── app/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── posts/
+│   │   ├── page.tsx
+│   │   └── [id]/
+│   │       ├── page.tsx
+│   ├── services/
+│   │   └── api.ts
+├── components/
+│   ├── PostList.tsx
+│   └── PostDetails.tsx
+├── styles/
+│   └── globals.css
+├── package.json
+└── tsconfig.json
+```
+
+---
+
+### Passo 1: Criar um Novo Projeto Next.js com TypeScript
+
+Execute o seguinte comando para inicializar um projeto Next.js com TypeScript:
+
+```shell script
+npx create-next-app@latest my-next-app --typescript
+cd my-next-app
+```
+
+Instale o TailwindCSS (opcional) para estilização:
+
+```shell script
+npm install tailwindcss postcss autoprefixer
+npx tailwindcss init
+```
+
+Configure o arquivo `tailwind.config.js` e importe os estilos globais no arquivo `globals.css`.
+
+---
+
+### Passo 2: Configurar o Serviço de Comunicação com a API REST
+
+Criaremos um arquivo **`services/api.ts`** para centralizar as chamadas à API REST.
+
+```typescript
+// app/services/api.ts
+export const API_BASE_URL = 'https://jsonplaceholder.typicode.com';
+
+export async function fetchPosts() {
+  const response = await fetch(`${API_BASE_URL}/posts`);
+  if (!response.ok) throw new Error('Failed to fetch posts');
+  return response.json();
+}
+
+export async function fetchPostDetails(id: number) {
+  const response = await fetch(`${API_BASE_URL}/posts/${id}`);
+  if (!response.ok) throw new Error('Failed to fetch post details');
+  return response.json();
+}
+```
+
+---
+
+### Passo 3: Criar o Layout Base e Página Inicial
+
+1. **`layout.tsx`**: Define o layout global da aplicação.
+
+```typescript
+// app/layout.tsx
+import './globals.css';
+
+export const metadata = {
+  title: 'Next.js API Integration',
+  description: 'A simple Next.js app interacting with an API REST',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body className="bg-gray-100 text-gray-900">
+        <main className="container mx-auto px-4 py-8">{children}</main>
+      </body>
+    </html>
+  );
+}
+```
+
+2. **`page.tsx`**: Página inicial que direciona o usuário para a lista de posts.
+
+```typescript
+// app/page.tsx
+export default function HomePage() {
+  return (
+    <div className="text-center">
+      <h1 className="text-2xl font-bold">Welcome to the Blog!</h1>
+      <p className="mt-4">Explore posts by clicking below:</p>
+      <a
+        href="/posts"
+        className="mt-6 inline-block bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+      >
+        View Posts
+      </a>
+    </div>
+  );
+}
+```
+
+---
+
+### Passo 4: Criar a Página de Listagem de Posts
+
+1. **`PostList.tsx`**: Componente para exibir a lista de posts.
+
+```typescript
+// components/PostList.tsx
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { fetchPosts } from '@/app/services/api';
+
+interface Post {
+  id: number;
+  title: string;
+  body: string;
+}
+
+export default function PostList() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const data = await fetchPosts();
+        setPosts(data);
+      } catch (error) {
+        console.error('Failed to fetch posts:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  if (loading) {
+    return <p>Loading posts...</p>;
+  }
+
+  return (
+    <ul className="space-y-4">
+      {posts.map((post) => (
+        <li key={post.id} className="bg-white p-4 rounded shadow">
+          <Link href={`/posts/${post.id}`}>
+            <h2 className="text-lg font-bold">{post.title}</h2>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+2. **`posts/page.tsx`**: Página para renderizar a lista de posts.
+
+```typescript
+// app/posts/page.tsx
+import PostList from '@/components/PostList';
+
+export default function PostsPage() {
+  return (
+    <div>
+      <h1 className="text-2xl font-bold mb-4">Blog Posts</h1>
+      <PostList />
+    </div>
+  );
+}
+```
+
+---
+
+### Passo 5: Criar a Página de Detalhes do Post
+
+1. **`PostDetails.tsx`**: Componente para exibir os detalhes de um post.
+
+```typescript
+// components/PostDetails.tsx
+'use client';
+
+import { useEffect, useState } from 'react';
+import { fetchPostDetails } from '@/app/services/api';
+
+interface Post {
+  id: number;
+  title: string;
+  body: string;
+}
+
+export default function PostDetails({ postId }: { postId: number }) {
+  const [post, setPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const data = await fetchPostDetails(postId);
+        setPost(data);
+      } catch (error) {
+        console.error('Failed to fetch post details:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, [postId]);
+
+  if (loading) {
+    return <p>Loading post details...</p>;
+  }
+
+  if (!post) {
+    return <p>Post not found.</p>;
+  }
+
+  return (
+    <div className="bg-white p-6 rounded shadow">
+      <h1 className="text-2xl font-bold mb-4">{post.title}</h1>
+      <p>{post.body}</p>
+    </div>
+  );
+}
+```
+
+2. **`posts/[id]/page.tsx`**: Página dinâmica para detalhes do post.
+
+```typescript
+// app/posts/[id]/page.tsx
+import PostDetails from '@/components/PostDetails';
+
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default function PostDetailsPage({ params }: PageProps) {
+  const postId = Number(params.id);
+
+  return (
+    <div>
+      <PostDetails postId={postId} />
+    </div>
+  );
+}
+```
+
+---
+
+### Passo 6: Teste a Aplicação
+
+Execute o servidor de desenvolvimento:
+
+```shell script
+npm run dev
+```
+
+- Acesse a URL **`/`** para ver a Home Page.
+- Navegue para **`/posts`** para listar os posts.
+- Clique em um post para ver os detalhes.
+
+---
+
+### Conclusão
+
+Neste tutorial, criamos uma aplicação Next.js com TypeScript que consome dados de uma API REST. Usamos a API dummy `jsonplaceholder.typicode.com` para ilustrar como buscar e exibir dados em páginas dinâmicas. A estrutura é escalável, permitindo que você adicione mais funcionalidades, como criação, edição e exclusão de posts.

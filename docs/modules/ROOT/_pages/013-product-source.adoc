@@ -1,0 +1,251 @@
+### Criando uma API Dummy de Produtos usando Next.js com TypeScript
+
+Nesta parte do tutorial, criaremos uma API REST simples no Next.js que servirá como **fonte de dados dummy para produtos**. Vamos criar endpoints que permitem:
+
+- Obter uma lista de produtos.
+- Obter os detalhes de um único produto.
+- Criar um novo produto.
+- Editar um produto existente.
+- Deletar um produto.
+
+Usaremos o diretório de **`/api`** do Next.js para implementar esta funcionalidade.
+
+---
+
+### Estrutura do Projeto
+
+A estrutura de diretórios para os arquivos que criaremos será algo como:
+
+```
+./
+├── app/
+│   ├── api/
+│   │   └── products/
+│   │       ├── route.ts
+│   │       └── [id]/
+│   │           └── route.ts
+```
+
+---
+
+## Etapa 1: Criar a Fonte de Dados Dummy para Produtos
+
+Utilizaremos um array em memória como fonte de dados para nossos produtos. Este array estará no arquivo `/api/products/route.ts`. Assim, sempre que o servidor for reiniciado, os dados serão resetados (característica de APIs dummy).
+
+### Modelo de Produto
+
+Cada produto terá o seguinte modelo (interface):
+
+```typescript
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+}
+```
+
+---
+
+## Etapa 2: Implementar os Endpoints de Produtos
+
+Aqui estão os detalhes de cada funcionalidade que a API terá.
+
+### **1. `GET /api/products`** - Obter Todos os Produtos
+
+Crie o arquivo `/api/products/route.ts`:
+
+```typescript
+import { NextResponse } from 'next/server';
+
+// Modelo de Produto
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+}
+
+// Dados em memória
+let products: Product[] = [
+  { id: 1, name: 'Produto 1', description: 'Descrição do Produto 1', price: 100, stock: 10 },
+  { id: 2, name: 'Produto 2', description: 'Descrição do Produto 2', price: 200, stock: 20 },
+  { id: 3, name: 'Produto 3', description: 'Descrição do Produto 3', price: 300, stock: 30 },
+];
+
+// Método GET para listar todos os produtos
+export async function GET() {
+  return NextResponse.json(products);
+}
+```
+
+---
+
+### **2. `POST /api/products`** - Criar um Novo Produto
+
+Atualize o mesmo arquivo (`/api/products/route.ts`) para suportar o método `POST`:
+
+```typescript
+// Método POST para criar um novo produto
+export async function POST(req: Request) {
+  const body = await req.json();
+
+  // Validação básica
+  if (!body.name || !body.description || !body.price || body.stock === undefined) {
+    return NextResponse.json(
+      { message: 'Todos os campos são obrigatórios!' },
+      { status: 400 }
+    );
+  }
+
+  const newProduct: Product = {
+    id: products.length + 1, // Gerar um ID fictício
+    name: body.name,
+    description: body.description,
+    price: body.price,
+    stock: body.stock,
+  };
+
+  // Adicionar o novo produto ao array
+  products.push(newProduct);
+
+  return NextResponse.json(newProduct, { status: 201 });
+}
+```
+
+---
+
+### **3. `GET /api/products/:id`** - Obter os Detalhes de um Produto
+
+Crie o arquivo **`/api/products/[id]/route.ts`** para lidar com endpoints dinâmicos.
+
+```typescript
+import { NextResponse } from 'next/server';
+
+// Método GET para obter os detalhes de um produto
+export async function GET(req: Request, { params }: { params: { id: string } }) {
+  const productId = parseInt(params.id, 10);
+  const product = products.find((p) => p.id === productId);
+
+  if (!product) {
+    return NextResponse.json({ message: 'Produto não encontrado!' }, { status: 404 });
+  }
+
+  return NextResponse.json(product);
+}
+```
+
+---
+
+### **4. `PUT /api/products/:id`** - Editar um Produto Existente
+
+Adicione o método `PUT` no arquivo `/api/products/[id]/route.ts`:
+
+```typescript
+// Método PUT para atualizar um produto existente
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  const productId = parseInt(params.id, 10);
+  const body = await req.json();
+
+  // Encontrar o produto pelo ID
+  const productIndex = products.findIndex((p) => p.id === productId);
+
+  if (productIndex === -1) {
+    return NextResponse.json({ message: 'Produto não encontrado!' }, { status: 404 });
+  }
+
+  // Validação básica
+  if (!body.name || !body.description || !body.price || body.stock === undefined) {
+    return NextResponse.json(
+      { message: 'Todos os campos são obrigatórios!' },
+      { status: 400 }
+    );
+  }
+
+  // Atualizar o produto
+  products[productIndex] = {
+    ...products[productIndex],
+    ...body, // Atualizar os dados recebidos do cliente
+  };
+
+  return NextResponse.json(products[productIndex]);
+}
+```
+
+---
+
+### **5. `DELETE /api/products/:id`** - Remover um Produto
+
+Adicione o método `DELETE` no arquivo `/api/products/[id]/route.ts`:
+
+```typescript
+// Método DELETE para remover um produto
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  const productId = parseInt(params.id, 10);
+
+  // Filtrar os produtos para remover o produto pelo ID
+  const newProducts = products.filter((p) => p.id !== productId);
+
+  if (newProducts.length === products.length) {
+    return NextResponse.json({ message: 'Produto não encontrado!' }, { status: 404 });
+  }
+
+  products = newProducts;
+
+  return NextResponse.json({ message: 'Produto removido com sucesso!' });
+}
+```
+
+---
+
+## Etapa 3: Testar a API
+
+1. Inicie seu servidor de desenvolvimento:
+
+```shell script
+npm run dev
+```
+
+2. Use **Postman**, **cURL** ou o navegador para testar os endpoints:
+
+- `GET /api/products`: Retorna todos os produtos.
+- `POST /api/products`: Cria um novo produto.
+- Corpo esperado:
+
+```json
+{
+         "name": "Novo Produto",
+         "description": "Descrição do novo produto",
+         "price": 500,
+         "stock": 15
+       }
+```
+
+- `GET /api/products/:id`: Retorna o produto com o ID especificado.
+- `PUT /api/products/:id`: Atualiza um produto existente.
+- Corpo esperado (exemplo para atualizar):
+
+```json
+{
+         "name": "Produto Atualizado",
+         "description": "Descrição atualizada",
+         "price": 450,
+         "stock": 8
+       }
+```
+
+- `DELETE /api/products/:id`: Remove o produto com o ID especificado.
+
+---
+
+## Etapa 4: Integração com Front-end (Opcional)
+
+Agora, você pode integrar essa API ao front-end da aplicação, exibindo a lista de produtos e permitindo gerenciá-los (criar, editar, deletar). Isso pode ser feito com componentes React e hooks para consumo da API.
+
+---
+
+## Conclusão
+
+Você criou uma API completa para gerenciar produtos no Next.js usando **roteamento dinâmico** e dados em memória. Essa solução pode ser expandida para usar bancos de dados reais, autenticação e outras funcionalidades. Essencialmente, ela serve como um ótimo ponto de partida para prototipagem e aprendizado.

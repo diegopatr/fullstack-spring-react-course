@@ -1,0 +1,26 @@
+site:
+  title: Desenvolvimento Web Fullstack Spring e React
+  start_page: fullstack-spring-react::index.adoc
+
+asciidoc:
+  attributes:
+    page-hide-nav-explore: true
+
+content:
+  sources:
+    - url: ./
+      start_path: docs
+      branches: HEAD
+
+ui:
+  bundle:
+    url: https://github.com/diegopatr/diegopatr-course-ui/releases/download/v0.0.1/ui-bundle.zip
+  supplemental_files:
+    - path: ui.yml
+      contents: |
+        static_files:
+        - .nojekyll
+    - path: .nojekyll
+
+runtime:
+  cache_dir: ./.cache/antora

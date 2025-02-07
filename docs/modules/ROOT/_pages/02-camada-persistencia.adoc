@@ -1,0 +1,113 @@
+= Aula 3: Modelagem do Banco de Dados e Criação das Entidades
+
+Nesta aula, vamos modelar o banco de dados para o nosso Sistema de Controle de Chamados e criar as entidades JPA que representarão as tabelas no banco.
+
+== Modelagem do Banco de Dados
+
+A modelagem do banco de dados é uma etapa crucial no desenvolvimento de software.  Um bom modelo de dados garante a integridade, consistência e eficiência do sistema.  Para o nosso projeto, vamos utilizar um Modelo Entidade-Relacionamento (MER) simplificado.
+
+=== Entidades e Atributos
+
+As principais entidades do nosso sistema são:
+
+* **Usuário:** Representa um usuário do sistema, podendo ser cliente, técnico ou administrador.  Atributos: `id`, `nome`, `email`, `senha`, `perfil` (enum: CLIENTE, TECNICO, ADMIN).
+* **Cliente:** Representa um cliente da empresa que utiliza o sistema para abrir chamados. Atributos: `id`, `nome`, `email`, `telefone`.  Um usuário com perfil CLIENTE estará associado a um Cliente.
+* **Chamado:** Representa um chamado de suporte técnico. Atributos: `id`, `titulo`, `descricao`, `status` (enum: ABERTO, EM_ANDAMENTO, FECHADO), `dataAbertura`, `dataFechamento`, `cliente` (relacionamento com a entidade Cliente), `tecnico` (relacionamento com a entidade Usuário - pode ser nulo).
+
+=== Relacionamentos
+
+* **Usuário - Cliente:** Um relacionamento 1:1. Cada usuário com perfil CLIENTE está associado a um único Cliente.
+* **Chamado - Cliente:** Um relacionamento N:1.  Um cliente pode ter vários chamados.
+* **Chamado - Usuário (Técnico):** Um relacionamento N:1. Um técnico pode ser responsável por vários chamados, e um chamado pode ter apenas um técnico.
+
+[plantuml]
+....
+@startuml
+entity Usuario {
+    * id : Long
+    nome : String
+    email : String
+    senha : String
+    perfil : Perfil
+}
+
+entity Cliente {
+    * id : Long
+    nome : String
+    email : String
+    telefone : String
+}
+
+entity Chamado {
+    * id : Long
+    titulo : String
+    descricao : String
+    status : Status
+    dataAbertura : Date
+    dataFechamento : Date
+}
+
+
+Usuario "1" -- "1" Cliente : possui
+Chamado "N" -- "1" Cliente : aberto por
+Chamado "N" -- "1" Usuario : atribuido a
+@enduml
+....
+
+
+== Criação das Entidades JPA
+
+Com o modelo de dados definido, vamos criar as entidades JPA.  As entidades são classes Java que representam as tabelas no banco de dados.
+
+=== Exemplo de Entidade `Chamado`
+
+[source,java]
+----
+import javax.persistence.*;
+import java.util.Date;
+
+@Entity
+public class Chamado {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String titulo;
+
+    @Column(length = 1000)
+    private String descricao;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(nullable = false)
+    private Date dataAbertura;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dataFechamento;
+
+    @ManyToOne
+    @JoinColumn(name = "cliente_id", nullable = false)
+    private Cliente cliente;
+
+    @ManyToOne
+    @JoinColumn(name = "tecnico_id")
+    private Usuario tecnico;
+
+    // Getters e Setters
+}
+
+enum Status {
+    ABERTO, EM_ANDAMENTO, FECHADO
+}
+----
+
+Crie as entidades `Usuario` e `Cliente` seguindo o mesmo padrão, utilizando as anotações JPA para mapear os atributos e relacionamentos.
+
+== Próximos Passos
+
+Com as entidades criadas, na próxima aula, vamos criar a camada de persistência (Repositories) para acessar os dados no banco de dados.

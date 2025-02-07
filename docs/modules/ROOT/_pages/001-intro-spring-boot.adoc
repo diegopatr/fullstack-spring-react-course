@@ -1,0 +1,352 @@
+= Introdução Spring Boot
+
+Spring Boot é um projeto da Spring que visa facilitar a criação de aplicações Java. Ele é baseado no framework Spring e segue a filosofia de convenção sobre configuração, o que significa que ele fornece configurações padrão para a maioria dos casos, permitindo que você se concentre no desenvolvimento da aplicação.
+
+Spring Boot é uma ferramenta poderosa para criar aplicações Java de forma rápida e eficiente. Ele fornece uma série de recursos que facilitam o desenvolvimento, como:
+
+* **Autoconfiguração:** O Spring Boot detecta automaticamente as bibliotecas e frameworks que você está usando e configura a aplicação de acordo.
+
+* **Embedded Containers:** O Spring Boot inclui servidores de aplicação embutidos, como Tomcat, Jetty e Undertow, o que facilita a execução da aplicação sem a necessidade de instalar um servidor separado.
+
+* **Spring Boot Starter:** O Spring Boot Starter é um conjunto de dependências que facilita a configuração de aplicações Spring. Ele inclui dependências comuns, como Spring MVC, Spring Data JPA, Spring Security, entre outras.
+
+* **Actuator:** O Spring Boot Actuator fornece endpoints que permitem monitorar e gerenciar a aplicação em tempo de execução.
+
+Com o Spring Boot, você pode criar aplicações Java de forma rápida e eficiente, sem a necessidade de configurações complexas. Ele fornece uma série de recursos que facilitam o desenvolvimento e permitem que você se concentre no que realmente importa: a lógica da aplicação.
+
+== Criando um Projeto Spring Boot
+
+Para criar um projeto Spring Boot, você pode utilizar o Spring Initializr, uma ferramenta online que gera um projeto Spring Boot com as dependências e configurações necessárias. Para isso, acesse o site [Spring Initializr](https://start.spring.io/) e siga os passos abaixo:
+
+1. Selecione a versão do Spring Boot que deseja utilizar.
+2. Escolha o tipo de projeto (Maven ou Gradle).
+3. Defina o nome do projeto e o pacote base.
+4. Adicione as dependências necessárias para o seu projeto, como Spring Web, Spring Data JPA, Spring Security, entre outras.
+5. Clique no botão "Generate" para baixar o projeto.
+
+image::003-spring-initializr.png[]
+
+Outra opção é criar o projeto Spring Boot diretamente em sua IDE de desenvolvimento, como IntelliJ IDEA, Eclipse ou Visual Studio Code. A maioria das IDEs possui suporte para a criação de projetos Spring Boot, o que facilita o processo de criação e configuração do projeto.
+
+1. Abra a sua IDE de desenvolvimento.
+2. Crie um novo projeto Spring Boot.
+3. Escolha as dependências e configurações desejadas.
+4. Clique em "Finish" para criar o projeto.
+
+image::001-spring-boot-ide-1.png[]
+image::002-spring-boot-ide-2.png[]
+
+Com o projeto gerado, você pode importá-lo em sua IDE de desenvolvimento e começar a implementar a lógica da aplicação.
+
+== Estrutura de um Projeto Spring Boot
+
+Um projeto Spring Boot segue uma estrutura padrão, que inclui os seguintes diretórios e arquivos:
+
+* **src/main/java:** Contém o código-fonte da aplicação Java.
+* **src/main/resources:** Contém os recursos da aplicação, como arquivos de configuração, mensagens, entre outros.
+* **src/test/java:** Contém os testes unitários da aplicação.
+* **src/test/resources:** Contém os recursos de teste da aplicação.
+* **pom.xml (Maven) ou build.gradle (Gradle):** Arquivo de configuração do projeto, que define as dependências, plugins e configurações do projeto.
+
+Dentro do diretório `src/main/java`, você encontrará a estrutura de pacotes da aplicação, que geralmente segue o padrão `com.example.app`. Nesse diretório, você criará as classes Java da aplicação, como controladores, serviços, repositórios, entre outras.
+
+== Adicionando Dependências ao Projeto
+
+Para adicionar dependências ao seu projeto Spring Boot, você pode editar o arquivo `pom.xml` (Maven) ou `build.gradle` (Gradle) e adicionar as dependências necessárias. Por exemplo, para adicionar a dependência do Spring Web, você pode adicionar o seguinte trecho ao arquivo `pom.xml`:
+
+[source,xml]
+----
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+----
+
+[source,kotlin]
+----
+implementation("org.springframework.boot:spring-boot-starter-web")
+----
+
+Com essa dependência adicionada, você terá acesso aos recursos do Spring Web, como controladores, anotações, entre outros.
+
+== Executando o Projeto Spring Boot
+
+Para executar o projeto Spring Boot, você pode utilizar a classe principal da aplicação, que geralmente contém o método `main`. Ao executar a aplicação, o Spring Boot iniciará o servidor embutido e disponibilizará a aplicação na porta padrão (geralmente 8080).
+
+Para executar o projeto, você pode utilizar o comando `mvn spring-boot:run` (Maven) ou `./gradlew bootRun` (Gradle) na raiz do projeto. Isso iniciará a aplicação e você poderá acessá-la em um navegador web, digitando o endereço `http://localhost:8080`.
+
+Outra opção é executar a aplicação diretamente pela sua IDE de desenvolvimento, clicando no botão de execução ou utilizando o atalho de teclado correspondente.
+
+Logs de execução da aplicação serão exibidos no console, permitindo que você acompanhe o processo de inicialização da aplicação e eventuais erros ou mensagens de aviso.
+
+[source]
+----
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.2)
+
+2025-02-11T09:17:02.449-03:00  INFO 17771 --- [spring-lab] [           main] b.u.ads.springlab.SpringLabApplication   : Starting SpringLabApplication using Java 21.0.6 with PID 17771 (/Users/diego/Developer/Docencia/2025-I/spring-lab/build/classes/java/main started by diego in /Users/diego/Developer/Docencia/2025-I/spring-lab)
+2025-02-11T09:17:02.451-03:00  INFO 17771 --- [spring-lab] [           main] b.u.ads.springlab.SpringLabApplication   : No active profile set, falling back to 1 default profile: "default"
+2025-02-11T09:17:02.933-03:00  INFO 17771 --- [spring-lab] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-02-11T09:17:02.956-03:00  INFO 17771 --- [spring-lab] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-02-11T09:17:02.957-03:00  INFO 17771 --- [spring-lab] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.34]
+2025-02-11T09:17:02.998-03:00  INFO 17771 --- [spring-lab] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-02-11T09:17:02.999-03:00  INFO 17771 --- [spring-lab] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 520 ms
+2025-02-11T09:17:03.292-03:00  INFO 17771 --- [spring-lab] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-02-11T09:17:03.303-03:00  INFO 17771 --- [spring-lab] [           main] b.u.ads.springlab.SpringLabApplication   : Started SpringLabApplication in 1.127 seconds (process running for 1.661)
+2025-02-11T09:18:19.301-03:00  INFO 17771 --- [spring-lab] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-02-11T09:18:19.302-03:00  INFO 17771 --- [spring-lab] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-02-11T09:18:19.305-03:00  INFO 17771 --- [spring-lab] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
+----
+
+Acessando a URL `http://localhost:8080`, você verá a página inicial da aplicação Spring Boot, indicando que a aplicação está em execução.
+
+Porém, como nenhuma rota foi definida, você verá uma mensagem de erro `Whitelabel Error Page`, indicando que a página não foi encontrada.
+
+image::004-spring-initial-page.png[]
+
+O próximo passo é definir as rotas da aplicação, criando controladores e métodos para atender às requisições dos clientes.
+
+== Spring Dev Tools
+
+Sempre que o projeto for modificado, a aplicação deverá ser reiniciada para que as alterações tenham efeito. Você pode reiniciar a aplicação pressionando `Ctrl + C` no terminal e executando novamente o comando `mvn spring-boot:run` ou `./gradlew bootRun`. Outra opção é utilizar a opção de reiniciar da sua IDE de desenvolvimento. Para que não seja necessário reiniciar a aplicação a cada alteração, você pode utilizar ferramentas como o Spring DevTools, que permite o hot reload das alterações.
+
+Adicione a dependência do Spring DevTools ao seu projeto para habilitar o live reload:
+
+[source]
+----
+developmentOnly("org.springframework.boot:spring-boot-devtools")
+----
+
+Sempre que uma nova dependencia for incluída no projeto, é necessário executar o comando `mvn clean install` ou `./gradlew clean build` para que as dependências sejam baixadas e o projeto seja reconstruído.
+
+Note que o log passa a exibir a informação de que o live reload está ativado:
+
+[source]
+----
+INFO 23718 --- [spring-lab] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+----
+
+== Spring Boot Auto Configuration
+
+O Spring Boot fornece um mecanismo de autoconfiguração que detecta automaticamente as bibliotecas e frameworks que você está usando e configura a aplicação de acordo. Isso significa que você não precisa se preocupar em configurar manualmente as dependências da aplicação, como banco de dados, servidor web, segurança, entre outros.
+
+Por exemplo, ao adicionar a dependência do Spring Data JPA ao seu projeto, o Spring Boot detecta automaticamente a presença dessa dependência e configura o banco de dados de acordo. Você não precisa se preocupar em configurar o datasource, o EntityManager, as transações, entre outros.
+
+O mecanismo de autoconfiguração do Spring Boot é uma das principais vantagens da ferramenta, pois simplifica o processo de desenvolvimento e permite que você se concentre na lógica da aplicação, em vez de se preocupar com a configuração da infraestrutura.
+
+No log de inicialização da aplicação, você verá mensagens indicando as configurações aplicadas automaticamente pelo Spring Boot. Por exemplo, se o Spring Boot detectar a presença do banco de dados H2 em seu projeto, ele configurará automaticamente o datasource, o EntityManager e as transações para esse banco de dados.
+
+Na aplicação, o DispatcherServlet é responsável por receber as requisições HTTP e direcioná-las para os controladores apropriados. Ele é configurado automaticamente pelo Spring Boot e não requer nenhuma configuração adicional.
+
+== Spring Boot Error Handling
+
+O Spring Boot fornece um mecanismo de tratamento de erros que permite personalizar a resposta da aplicação quando ocorre um erro. Por padrão, o Spring Boot retorna uma página de erro padrão, conhecida como Whitelabel Error Page, quando ocorre um erro na aplicação.
+
+Para personalizar a resposta de erro, você pode criar um controlador que intercepte as exceções e retorne uma resposta personalizada. Por exemplo, você pode criar um controlador que intercepte a exceção `ResourceNotFoundException` e retorne uma mensagem de erro personalizada.
+
+== Spring Boot Actuator
+
+O Spring Boot Actuator é um conjunto de ferramentas que permite monitorar e gerenciar a aplicação em tempo de execução. Ele fornece endpoints que expõem informações sobre a aplicação, como métricas, saúde, informações do ambiente, entre outros.
+
+Para habilitar o Spring Boot Actuator em seu projeto, adicione a dependência correspondente ao seu arquivo `pom.xml` ou `build.gradle`:
+
+[source]
+----
+implementation("org.springframework.boot:spring-boot-starter-actuator")
+----
+
+Com o Spring Boot Actuator habilitado, você terá acesso a uma série de endpoints que fornecem informações sobre a aplicação. Por exemplo, o endpoint `/actuator/health` fornece informações sobre a saúde da aplicação, indicando se ela está em execução corretamente.
+
+== Configuração do Spring Boot
+
+O Spring Boot permite configurar a aplicação por meio de arquivos de propriedades, YAML  ou classes de configuração. Você pode definir propriedades como o nome da aplicação, a porta do servidor, o datasource, entre outros, por meio desses arquivos de configuração.
+
+As configurações disponíveis podem ser encontradas na documentação oficial do Spring Boot (https://docs.spring.io/spring-boot/appendix/application-properties/index.html[Documentação do Spring Boot]), que descreve as propriedades suportadas e seus valores padrão. Você pode personalizar a configuração da aplicação de acordo com as necessidades do projeto, alterando as propriedades no arquivo de configuração correspondente.
+
+Confira a tabela abaixo como utilizar cada tipo de configuração:
+
+|===
+| Tipo de Configuração | Arquivo de Configuração | Exemplo
+| Propriedades | application.properties | server.port=8080
+| YAML | application.yml | server: port: 8080
+| Classes de Configuração | @Configuration | @Configuration @PropertySource("classpath:application.properties") public class AppConfig {}
+|===
+
+A configuração da aplicação obedece uma precedência de propriedades, onde as propriedades definidas em arquivos de configuração têm precedência sobre as propriedades definidas em classes de configuração. Isso permite que você defina propriedades padrão em arquivos de configuração e as sobrescreva conforme necessário em classes de configuração.
+
+Lista de prioridade de propriedades:
+1. Propriedades definidas em arquivos de configuração.
+2. Propriedades definidas em classes de configuração.
+3. Propriedades definidas em classes de configuração com anotações `@ConfigurationProperties`.
+4. Propriedades definidas em classes de configuração com anotações `@Value`.
+5. Propriedades definidas em classes de configuração com anotações `@PropertySource`.
+6. Propriedades definidas em classes de configuração com anotações `@Configuration`.
+7. Propriedades definidas em classes de configuração com anotações `@Component`.
+8. Propriedades definidas em classes de configuração com anotações `@Bean`.
+9. Propriedades definidas em classes de configuração com anotações `@Import`.
+
+Para modificar a porta padrão do servidor embutido do Spring Boot, você pode adicionar a seguinte propriedade ao arquivo `application.properties`:
+
+[source]
+----
+server.port=9090
+----
+
+Com essa configuração, o servidor embutido do Spring Boot será iniciado na porta 9090 em vez da porta padrão 8080.
+
+== Criando um Controlador Spring Boot
+
+Para criar um controlador Spring Boot, você deve criar uma classe Java e anotá-la com `@RestController`. Essa anotação indica que a classe é um controlador REST e que os métodos da classe serão mapeados para endpoints da aplicação.
+
+Por exemplo, para criar um controlador que responda à rota `/hello`, você pode criar a seguinte classe:
+
+[source,java]
+----
+@RestController
+public class HelloController {
+
+    @GetMapping("/hello")
+    public String hello() {
+        return "Hello, Spring Boot!";
+    }
+}
+----
+
+A anotação `@GetMapping("/hello")` indica que o método `hello` responderá à rota `/hello` quando a requisição for do tipo GET. O método retorna a mensagem `Hello, Spring Boot!`.
+
+Nesse exemplo, a classe `HelloController` é um controlador REST que responde à rota `/hello` com a mensagem `Hello, Spring Boot!`.
+
+Ao acessar a URL `http://localhost:8080/hello`, você verá a mensagem `Hello, Spring Boot!` exibida no navegador.
+
+A anotação @RestController é uma combinação de @Controller e @ResponseBody, o que significa que ela simplifica a criação de controladores REST que retornam dados no corpo da resposta.
+
+O formato do conteúdo retornado pelo controlador depende do tipo de retorno do método. Se o método retorna um objeto, o Spring Boot serializa o objeto para JSON ou XML, dependendo da configuração da aplicação.
+
+Exemplo:
+
+[source,java]
+----
+
+// Classe Produto
+public class Produto {
+
+    private Long id;
+    private String nome;
+    private Double preco;
+
+    // Construtor
+    public Produto(Long id, String nome, Double preco) {
+        this.id = id;
+        this.nome = nome;
+        this.preco = preco;
+    }
+
+    // Getters e Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public Double getPreco() {
+        return preco;
+    }
+
+    public void setPreco(Double preco) {
+        this.preco = preco;
+    }
+}
+----
+
+[source,java]
+----
+@RestController
+public class HelloController {
+
+    @GetMapping("/hello")
+    public String hello() {
+        return "Hello, Spring Boot!";
+    }
+    
+    @GetMapping("/serializacao")
+    public Produto serializacao() {
+        return new Produto(1, "Produto 1", 10.0, 100);
+    }
+}
+----
+
+O método `serializacao` retorna um objeto da classe `Produto`, que será serializado para JSON e retornado no corpo da resposta.
+
+[source]
+----
+{
+  "id": 1,
+  "nome": "Produto 1",
+  "preco": 10,
+  "estoque": 100
+}
+----
+
+Para tratar requisições do tipo POST, você pode utilizar a anotação `@PostMapping`:
+
+[source,java]
+----
+@RestController
+public class HelloController {
+
+    @GetMapping("/hello")
+    public String helloGet() {
+        return "Hello, Spring Boot!";
+    }
+
+    @PostMapping("/hello")
+    public String helloPost(@RequestBody String body) {
+        return "Hello, {}!".replace("{}", body);
+    }
+}
+----
+
+Nesse exemplo, o método `helloPost` responde à rota `/hello` quando a requisição é do tipo POST. O método recebe o corpo da requisição como parâmetro e retorna a mensagem `Hello, {body}!`, substituindo `{body}` pelo conteúdo do corpo da requisição.
+
+== Realizando requisições HTTP utilizando IntelliJ IDEA
+
+Para realizar requisições HTTP utilizando o IntelliJ IDEA, você pode utilizar a ferramenta de testes de API integrada. Para isso, siga os passos abaixo:
+
+1. Abra o IntelliJ IDEA e acesse a aba `Tools` no menu superior.
+2. Selecione a opção `Test RESTful Web Service`.
+3. Na janela que se abrirá, insira a URL da requisição (por exemplo, `http://localhost:8080/hello`) e selecione o método HTTP desejado (GET, POST, PUT, DELETE, etc.).
+
+image::005-intellij-idea-http-request.png[]
+
+4. Clique no botão `Run` para enviar a requisição e visualizar a resposta no painel inferior.
+
+image::006-intellij-idea-http-response.png[]
+
+== Criando um repositório Git
+
+Para criar um repositório Git para o seu projeto Spring Boot, você pode utilizar o Git localmente ou um serviço de hospedagem de repositórios, como GitHub, GitLab ou Bitbucket.
+
+Para criar um repositório Git localmente, siga os passos abaixo:
+
+1. Abra o terminal e navegue até o diretório do seu projeto.
+2. Inicialize o repositório Git com o comando `git init`.
+3. Adicione os arquivos do projeto ao repositório com o comando `git add .`.
+4. Faça o commit dos arquivos adicionados com o comando `git commit -m "Initial commit"`.
+
+Com esses comandos, você criará um repositório Git local para o seu projeto Spring Boot.

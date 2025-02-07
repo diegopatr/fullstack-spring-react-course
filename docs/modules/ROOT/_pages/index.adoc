@@ -1,0 +1,5 @@
+= Welcome
+
+Index page for the documentation module.
+
+This module contains the documentation for the courseware.

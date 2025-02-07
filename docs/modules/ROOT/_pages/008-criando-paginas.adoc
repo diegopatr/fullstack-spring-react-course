@@ -1,0 +1,198 @@
+= Criando Páginas
+
+== Organizando o Projeto
+
+== Convenções para Criação de Arquivos e Pastas no App Router
+
+A organização dos arquivos e pastas é essencial para o funcionamento do roteamento utilizando o *App Router*.
+Seguir as principais convenções facilita a manutenção do código, compreensão por parte de outros desenvolvedores e integração com ferramentas framework-specific.
+
+=== Estrutura Básica de Diretório
+
+- Cada *arquivo* em uma pasta de rotas (_routes folder_) representa uma rota específica na aplicação.
+- Pastas podem ser usadas para agrupar *rotas dinâmicas* ou *rotas aninhadas*.
+
+Exemplo:
+
+```plaintext
+/pages
+  /produtos
+    [id].js       -> Rota dinâmica (ex.: `/produtos/123`)
+  /contato.js     -> Representa `/contato`
+  /index.js       -> Rota raiz `/`
+```
+
+=== Arquivos de Configuração
+
+- **`index.js` ou equivalente**: Representa o ponto da rota principal dentro de um diretório.
+- **Arquivos com `[]`**: Identificam rotas dinâmicas, como parâmetros de rota.
+
+=== Benefícios da Boa Organização
+
+1. **Clareza**: Fica fácil identificar o que cada rota faz.
+2. **Manutenção**: Alterações em uma rota afetam apenas um arquivo isolado.
+3. **Escalabilidade**: Ajuda a gerenciar rotas em aplicações maiores sem perder controle.
+
+= Guia: Criando Layouts e Páginas no Next.js
+
+O Next.js utiliza roteamento baseado no sistema de arquivos, o que significa que você pode usar pastas e arquivos para definir rotas. Este guia irá mostrar como criar layouts e páginas, além de como navegar entre elas.
+
+== Criando uma Página
+Uma página é a interface de usuário (UI) renderizada em uma rota específica. Para criar uma página:
+
+1. Crie um arquivo de página dentro do diretório `app`.
+2. Faça a exportação padrão de um componente React.
+
+.Exemplo: Criando uma página inicial index (/)
+[source,typescript]
+----
+app/page.tsx
+
+export default function Page() {
+  return <h1>Hello Next.js!</h1>;
+}
+----
+
+== Criando um Layout
+Um layout é uma interface compartilhada entre várias páginas. Durante a navegação, os layouts preservam o estado, permanecem interativos e não são re-renderizados.
+
+1. Defina um layout exportando um componente React como padrão de um arquivo de layout.
+2. O componente deve aceitar uma prop `children`, que pode ser uma página ou outro layout.
+
+=== Exemplo: Criando um layout
+[source,typescript]
+----
+app/layout.tsx
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>
+        {/* Layout UI */}
+        <main>{children}</main>
+      </body>
+    </html>
+  );
+}
+----
+
+*Dica:* O layout acima é chamado de layout raiz ("root layout"), pois está dentro do diretório `app`. O layout raiz é obrigatório e deve conter as tags `html` e `body`.
+
+== Criando uma Rota Aninhada
+Uma rota aninhada é composta de múltiplos segmentos de URL. Por exemplo, a rota `/blog/[slug]` contém três segmentos:
+
+* `/` (Segmento Raiz)
+* `blog` (Segmento)
+* `[slug]` (Segmento Final ou Dinâmico)
+
+=== Passo a Passo para criar rotas:
+1. Use pastas para representar os segmentos das rotas.
+2. Use arquivos (`page.tsx`, `layout.tsx`) para desenhar as interfaces dos segmentos.
+
+==== Exemplo: Criando a rota `/blog`
+1. Crie uma pasta `blog` no diretório `app`.
+2. Adicione um arquivo `page.tsx` dentro da pasta:
+
+[source,typescript]
+----
+app/blog/page.tsx
+
+import { getPosts } from '@/lib/posts';
+import { Post } from '@/ui/post';
+
+export default async function Page() {
+  const posts = await getPosts();
+
+  return (
+    <ul>
+      {posts.map((post) => (
+        <Post key={post.id} post={post} />
+      ))}
+    </ul>
+  );
+}
+----
+
+==== Dinamizando rotas com parâmetros
+1. Crie uma nova pasta entre colchetes (e.g., `[slug]`) dentro de `blog`.
+2. Dentro dessa pasta, adicione um arquivo `page.tsx`.
+
+.Exemplo: Rota para um post específico
+[source,typescript]
+----
+app/blog/[slug]/page.tsx
+
+export default function Page() {
+  return <h1>Hello, Blog Post Page!</h1>;
+}
+----
+
+*Nota:* Colocar o nome da pasta entre colchetes (e.g., `[slug]`) cria um segmento de rota dinâmico. Isso é útil para páginas de blog, produtos, etc.
+
+== Aninhando Layouts
+Layouts podem ser aninhados para criar estruturas mais complexas. Isso significa que layouts de uma pasta podem envolver `children` de outros layouts em níveis mais internos.
+
+=== Exemplo: Criando um layout para `/blog`
+1. Adicione um arquivo `layout.tsx` dentro da pasta `blog`.
+
+[source,typescript]
+----
+app/blog/layout.tsx
+
+export default function BlogLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <section>{children}</section>;
+}
+----
+
+=== Combinação de layouts
+Se combinarmos os layouts criados até aqui:
+* O layout raiz (`app/layout.js`) envolveria o layout do blog (`app/blog/layout.js`).
+* O layout do blog envolveria suas páginas, como `app/blog/page.js` e `app/blog/[slug]/page.js`.
+
+== Navegando entre Páginas
+Para navegar entre rotas, você pode usar o componente `<Link>` do Next.js. Este componente estende a tag HTML `<a>` para oferecer *prefetching* e navegação do lado do cliente.
+
+=== Exemplo: Gerando uma lista de posts com links
+1. Importe o componente `<Link>` de `next/link`.
+2. Use a prop `href` para especificar o destino.
+
+[source,typescript]
+----
+app/ui/post.tsx
+
+import Link from 'next/link';
+
+export default async function Post({ post }) {
+  const posts = await getPosts();
+
+  return (
+    <ul>
+      {posts.map((post) => (
+        <li key={post.slug}>
+          <Link href={`/blog/${post.slug}`}>{post.title}</Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+----
+
+*Dica:* O `<Link>` é a forma recomendada de navegar entre rotas no Next.js. Para navegação avançada, use o hook `useRouter`.
+
+== Conclusão
+Com este guia, você aprendeu:
+* Como criar páginas e layouts usando o roteamento baseado em arquivos do Next.js.
+* Como criar rotas aninhadas, dinâmicas e seus respectivos layouts.
+* Como usar `<Link>` para navegar entre páginas.
+
+Explore esses conceitos para construir UIs sofisticadas enquanto mantém um código limpo e organizado no Next.js!
+
+

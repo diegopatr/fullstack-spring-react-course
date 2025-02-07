@@ -1,0 +1,244 @@
+= CSS e Next.js
+
+``` asciidoc
+= Tutorial: Utilizando CSS com Next.js, Tailwind CSS e TypeScript
+Este tutorial ensina como configurar e utilizar o Tailwind CSS em um projeto Next.js com suporte a TypeScript. O Tailwind é uma biblioteca CSS utilitária poderosa que facilita o desenvolvimento de interfaces personalizadas. Vamos passo a passo criar e configurar o ambiente.
+
+== 1. Criando um Projeto Next.js com TypeScript
+1. Certifique-se de ter o `Node.js` e o `npm` instalados.
+2. Crie um novo projeto Next.js com suporte a TypeScript:
+```
+npx create-next-app nome-do-projeto --typescript
+``` 
+3. Navegue até o diretório do projeto:
+```
+cd nome-do-projeto
+``` 
+4. Inicie o servidor para garantir que o projeto foi configurado corretamente:
+```
+npm run dev
+``` 
+Abra o navegador e acesse `http://localhost:3000`. Você deve ver a página inicial padrão do Next.js.
+
+== 2. Instalando e Configurando o Tailwind CSS
+Tailwind CSS será usado como a principal biblioteca de estilização.
+
+=== 2.1 Instalando o Tailwind CSS
+1. Instale as dependências do Tailwind CSS:
+```
+npm install tailwindcss postcss autoprefixer
+``` 
+
+2. Inicialize os arquivos de configuração do Tailwind:
+```
+npx tailwindcss init -p
+``` 
+Isso criará dois arquivos:
+* `tailwind.config.js`: Configurações do Tailwind.
+* `postcss.config.js`: Configurações do PostCSS.
+
+=== 2.2 Configurando o Tailwind CSS
+Abra o arquivo `tailwind.config.js` gerado e configure os paths para que o Tailwind possa purgar classes não utilizadas durante a build:
+[source,javascript]
+----
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+----
+
+=== 2.3 Incluindo o Tailwind no Projeto
+No arquivo `styles/globals.css`, importe os estilos básicos do Tailwind CSS. Substitua o conteúdo do arquivo caso necessário.
+
+[source,css]
+----
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+----
+
+Certifique-se de que o arquivo CSS está sendo importado no seu projeto. O Next.js já importa `globals.css` automaticamente através de `_app.tsx`:
+[source,typescript]
+----
+import '../styles/globals.css';
+import type { AppProps } from 'next/app';
+
+function MyApp({ Component, pageProps }: AppProps) {
+  return <Component {...pageProps} />;
+}
+
+export default MyApp;
+----
+
+Reinicie o servidor de desenvolvimento para aplicar as alterações:
+```
+npm run dev
+``` 
+
+== 3. Criando Componentes com Estilização do Tailwind
+Com o Tailwind configurado, você pode adicionar classes utilitárias diretamente nos elementos HTML. Vamos criar um layout e estilizar componentes.
+
+=== 3.1 Estilizando o Layout Principal
+1. Abra o arquivo `pages/index.tsx` (ou crie um novo) e utilize o Tailwind para estilizar a página inicial:
+
+[source,typescript]
+----
+const Home = () => {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <header className="bg-blue-500 w-full text-white py-4">
+        <h1 className="text-center text-3xl">Meu Projeto com Tailwind CSS</h1>
+      </header>
+      <main className="flex-1 w-full flex flex-col items-center justify-center">
+        <p className="text-gray-700 text-lg">
+          Estilizando com Tailwind CSS e Next.js!
+        </p>
+        <button className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          Clique Aqui
+        </button>
+      </main>
+      <footer className="bg-gray-800 w-full text-white py-2 text-center">
+        <p>Feito com ❤️ usando Tailwind CSS</p>
+      </footer>
+    </div>
+  );
+};
+
+export default Home;
+----
+
+=== 3.2 Criando Componentes Personalizados
+Vamos criar um componente reutilizável para botões:
+
+1. Crie uma pasta chamada `components` no diretório raiz.
+2. Dentro dessa pasta, crie o arquivo `Button.tsx`:
+
+[source,typescript]
+----
+type ButtonProps = {
+  label: string;
+  onClick: () => void;
+  color?: 'blue' | 'green' | 'red';
+};
+
+const Button: React.FC<ButtonProps> = ({ label, onClick, color = 'blue' }) => {
+  const colorClasses =
+    color === 'blue'
+      ? 'bg-blue-500 hover:bg-blue-700'
+      : color === 'green'
+      ? 'bg-green-500 hover:bg-green-700'
+      : 'bg-red-500 hover:bg-red-700';
+
+  return (
+    <button
+      onClick={onClick}
+      className={`text-white font-bold py-2 px-4 rounded ${colorClasses}`}
+    >
+      {label}
+    </button>
+  );
+};
+
+export default Button;
+----
+
+Uso do componente:
+[source,typescript]
+----
+import Button from '../components/Button';
+
+const Home = () => {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <Button label="Clique Aqui" onClick={() => alert('Botão clicado!')} />
+    </div>
+  );
+};
+
+export default Home;
+----
+
+=== 3.3 Trabalhando com Layouts
+Você pode criar layouts responsivos utilizando utilitários do Tailwind:
+
+[source,typescript]
+----
+const GridExample = () => {
+  return (
+    <div className="grid grid-cols-3 gap-4 p-4">
+      <div className="bg-blue-300 p-4 text-center">Coluna 1</div>
+      <div className="bg-green-300 p-4 text-center">Coluna 2</div>
+      <div className="bg-red-300 p-4 text-center">Coluna 3</div>
+    </div>
+  );
+};
+
+export default GridExample;
+----
+
+== 4. Personalizando o Tema
+Você pode estender cores, fontes e outras configurações no arquivo `tailwind.config.js`:
+
+[source,javascript]
+----
+module.exports = {
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        customBlue: '#1E40AF',
+        customGreen: '#059669',
+      },
+      fontFamily: {
+        sans: ['Roboto', 'Arial', 'sans-serif'],
+      },
+    },
+  },
+  plugins: [],
+};
+----
+
+Example de uso de cor customizada:
+[source,typescript]
+----
+const CustomComponent = () => {
+  return <p className="text-customBlue">Texto com cor personalizada!</p>;
+};
+
+export default CustomComponent;
+----
+
+== 5. Implementando Responsividade
+O Tailwind facilita criar interfaces responsivas com breakpoints:
+
+[source,typescript]
+----
+const ResponsiveExample = () => {
+  return (
+    <div className="p-4">
+      <div className="bg-gray-300 text-center p-4 md:bg-blue-300 lg:bg-green-300">
+        Container Responsivo
+      </div>
+    </div>
+  );
+};
+
+export default ResponsiveExample;
+----
+
+== Conclusão
+
+Você configurou com sucesso um projeto **Next.js** utilizando **Tailwind CSS** e **TypeScript** para gerenciar e estilizar aplicativos da maneira mais eficiente possível. Agora pode criar interfaces modernas, responsivas e personalizadas com facilidade!
+
+Explore mais utilitários no site oficial do Tailwind CSS: https://tailwindcss.com/docs.
+```

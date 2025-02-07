@@ -1,0 +1,5 @@
+name: fullstack-spring-react
+title: Fullstack Java Spring e React
+version: ~
+nav:
+  - modules/ROOT/nav.adoc
