@@ -1,0 +1,116 @@
+= Guia Prático de Utilização do Gradle
+:toc:
+:toc-title: Sumário
+
+Gradle é uma poderosa ferramenta de automação de build que combina os melhores recursos do Apache Ant e Maven. Este guia introduz os conceitos básicos para começar a utilizar o Gradle.
+
+== O que é Gradle?
+
+Gradle é um sistema de build flexível que suporta a automação de builds para diversos tipos de projetos, especialmente projetos Java. Ele utiliza um DSL baseado em Groovy ou Kotlin para descrever os builds, permitindo maior flexibilidade e personalização.
+
+== Instalação do Gradle
+
+=== Pré-requisitos
+
+1. Ter o Java instalado (versão 8 ou superior).
+2. Configurar a variável de ambiente `JAVA_HOME`.
+
+=== Passos para instalação
+
+1. Baixe o Gradle do site oficial: https://gradle.org/releases/
+2. Extraia o arquivo para um diretório local.
+3. Configure a variável de ambiente `GRADLE_HOME` apontando para o diretório onde você extraiu o Gradle.
+4. Adicione o diretório `GRADLE_HOME/bin` ao `PATH`.
+
+=== Verificar instalação
+
+Abra um terminal e execute:
+
+```
+gradle -v
+```
+
+Se a instalação foi bem-sucedida, você verá a versão do Gradle e outras informações do sistema.
+
+== Estrutura de um Projeto Gradle
+
+Um projeto Gradle típico possui a seguinte estrutura de diretórios:
+
+```
+project-root/ 
+├── build.gradle 
+├── settings.gradle 
+├── gradle/ 
+│ └── wrapper/ 
+│ ├── gradle-wrapper.jar 
+│ └── gradle-wrapper.properties 
+└── src/ 
+  ├── main/ 
+  │ ├── java/ 
+  │ └── resources/ 
+  └── test/ 
+  ├── java/ 
+  └── resources/
+```
+
+== Arquivo build.gradle
+
+O arquivo `build.gradle` é onde você define as configurações e dependências do seu projeto. Aqui está um exemplo básico:
+
+```groovy
+plugins {
+    id 'java'
+}
+
+group 'com.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.12'
+}
+```
+
+== Comandos Básicos do Gradle
+
+=== Compilar o Projeto
+
+Para compilar o projeto, execute:
+
+```
+gradle build
+```
+
+=== Executar Testes  
+
+Para executar os testes, utilize:
+
+```
+gradle test
+```
+
+=== Limpar o Projeto  
+
+Para limpar os arquivos gerados pelo build, execute:
+
+```
+gradle clean
+```
+
+
+== Gradle Wrapper  
+O Gradle Wrapper permite que você execute um projeto Gradle sem precisar instalar o Gradle manualmente. Para gerar o wrapper, execute:
+
+```
+gradle wrapper
+```
+
+Isso criará os arquivos necessários no diretório `gradle/wrapper`.
+
+
+== Referências
+
+Para mais informações, consulte a documentação oficial: https://docs.gradle.org/

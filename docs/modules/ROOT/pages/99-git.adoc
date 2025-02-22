@@ -1,0 +1,186 @@
+= Guia Básico de Utilização do Git
+
+Este guia fornece um resumo rápido de comandos básicos do Git para gerenciamento de código-fonte e controle de versões.
+
+== Configuração Inicial
+
+Antes de usar o Git, configure suas informações de usuário:
+
+```bash
+git config --global user.name "Seu Nome"
+git config --global user.email "seu.email@example.com"
+```
+
+Para verificar suas configurações:
+
+```bash
+git config --list
+```
+
+== Comandos Básicos
+
+=== Clonar um Repositório
+
+Para clonar um repositório existente:
+
+```bash
+git clone <url-do-repositorio>
+```
+
+Exemplo:
+
+```bash
+git clone https://github.com/usuario/repositorio.git
+```
+
+=== Iniciar um Repositório
+
+Para iniciar um novo repositório local:
+
+```bash
+git init
+```
+
+=== Adicionar Arquivos
+
+Para adicionar novos arquivos ou alterações ao _staging_:
+
+```bash
+git add <nome-do-arquivo>
+```
+
+Para adicionar todos os arquivos alterados:
+
+```bash
+git add .
+```
+
+=== Criar um Commit
+
+Para salvar alterações no histórico do repositório:
+
+```bash
+git commit -m "Mensagem do commit"
+```
+
+=== Verificar o Status
+
+Para verificar as modificações e o estado do _staging_:
+
+```bash
+git status
+```
+
+=== Ver Histórico de Commits
+
+Para ver o histórico de commits recente:
+
+```bash
+git log
+```
+
+Com resumo compacto:
+
+```bash
+git log --oneline
+```
+
+== Trabalhando com Branches
+
+=== Criar uma Branch
+
+Crie uma nova branch:
+
+```bash
+git branch <nome-da-branch>
+```
+
+=== Trocar de Branch
+
+Mude para outra branch:
+
+```bash
+git checkout <nome-da-branch>
+```
+
+No Git moderno:
+
+```bash
+git switch <nome-da-branch>
+```
+
+=== Criar e Mudar de Branch
+
+Para criar e trocar de branch em um único comando:
+
+```bash
+git checkout -b <nome-da-branch>
+```
+
+No Git moderno:
+
+```bash
+git switch -c <nome-da-branch>
+```
+
+=== Mesclar Branches
+
+Para mesclar uma branch com a branch atual:
+
+```bash
+git merge <nome-da-branch>
+```
+
+== Sincronizando Mudanças
+
+=== Enviar Commits para o Repositório Remoto
+
+Para enviar seus commits:
+
+```bash
+git push origin <nome-da-branch>
+```
+
+=== Atualizar com Mudanças do Repositório Remoto
+
+Para trazer as alterações do repositório remoto:
+
+```bash
+git pull
+```
+
+== Outros Comandos Úteis
+
+=== Desfazer Alterações no _Staging_
+
+Para remover um arquivo do _staging_:
+
+```bash
+git restore --staged <nome-do-arquivo>
+```
+
+=== Excluir Arquivos Rastreados
+
+Para remover arquivos rastreados pelo Git:
+
+```bash
+git rm <nome-do-arquivo>
+```
+
+=== Verificar Diferenças
+
+Para visualizar as diferenças entre alterações:
+
+```bash
+git diff
+```
+
+== Dicas Finais
+
+- Sempre forneça mensagens de commit claras e significativas.
+- Faça commits frequentemente para salvar o progresso de forma incremental.
+- Use branches para organizar diferentes linhas de desenvolvimento.
+
+== Referências
+
+Para mais informações, acesse a documentação oficial do git em https://git-scm.com.

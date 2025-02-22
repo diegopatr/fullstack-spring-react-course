@@ -1,0 +1,16 @@
+= Instalação do JetBrains IntelliJ IDEA
+
+. Baixe o JetBrains Toolbox no site oficial https://www.jetbrains.com/toolbox-app[JetBrains Toolbox App,window=_blank].
+. Execute o instalador do JetBrains Toolbox e siga as instruções para concluir a instalação.
+. Abra o JetBrains Toolbox após a instalação.
+. Faça login na sua conta da JetBrains ou crie uma nova conta.
+. Na interface da Toolbox App, localize o IntelliJ IDEA na lista de produtos JetBrains disponíveis.
+. Clique no botão "Install" ao lado do IntelliJ IDEA (Ultimate ou Community, dependendo da sua escolha).
+. Aguarde a conclusão do download e instalação.
+A Toolbox App fará a instalação automática.
+. Após o término da instalação, você verá o IntelliJ IDEA disponível na listagem da Toolbox App.
+Clique em "Open" para abrir o IntelliJ IDEA.
+. Configure o IntelliJ IDEA pela primeira vez, conforme necessário (tema da interface, plugins, etc.).
+
+Pronto!
+Agora você pode começar a usar o IntelliJ IDEA em seu projeto.

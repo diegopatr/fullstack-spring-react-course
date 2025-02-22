@@ -1,0 +1,134 @@
+= Guia Básico de Utilização do npm
+
+npm (Node Package Manager) é o gerenciador de pacotes padrão para o Node.js.
+Ele ajuda a instalar, compartilhar e gerenciar dependências em projetos JavaScript.
+
+== Instalação
+
+npm é instalado automaticamente junto com o Node.js.
+Para verificar a versão instalada:
+
+```bash
+node -v
+npm -v
+```
+
+== Comandos Básicos
+
+=== Inicializar um Projeto
+
+Para iniciar um projeto e criar o arquivo `package.json`:
+
+```bash
+npm init
+```
+
+Ou para inicializar com as configurações padrão:
+
+```bash
+npm init -y
+```
+
+=== Instalar Pacotes
+
+Para instalar um pacote e adicionar à lista de dependências (`dependencies`) no `package.json`:
+
+```bash
+npm install <nome-do-pacote>
+```
+
+Para instalar um pacote como dependência de desenvolvimento (`devDependencies`):
+
+```bash
+npm install <nome-do-pacote> --save-dev
+```
+
+Exemplo: Para instalar o `nodemon` como dependência de desenvolvimento:
+
+```bash
+npm install nodemon --save-dev
+```
+
+Para instalar pacotes globalmente (disponível para todos os projetos):
+
+```bash
+npm install -g <nome-do-pacote>
+```
+
+=== Remover Pacotes
+
+Para remover um pacote do projeto:
+
+```bash
+npm uninstall <nome-do-pacote>
+```
+
+=== Atualizar Pacotes
+
+Atualizar um pacote específico:
+
+```bash
+npm update <nome-do-pacote>
+```
+
+Atualizar todos os pacotes:
+
+```bash
+npm update
+```
+
+=== Executar Scripts
+
+Adicione scripts no `package.json` (seção `scripts`) e rode-os com:
+
+```bash
+npm run <nome-do-script>
+```
+
+Exemplo de script no `package.json`:
+
+```json
+"scripts": {
+  "start": "node app.js",
+  "dev": "nodemon app.js"
+}
+```
+
+Para rodar o script:
+
+```bash
+npm run start
+```
+
+=== Listar Dependências
+
+Para listar os pacotes instalados localmente:
+
+```bash
+npm list
+```
+
+Para listar pacotes instalados globalmente:
+
+```bash
+npm list -g --depth=0
+```
+
+=== Solução de Problemas
+
+- Para limpar cache do npm:
+
+```bash
+npm cache clean --force
+```
+
+- Para restaurar dependências (deletar `node_modules` e reinstalar todas):
+
+```bash
+rm -rf node_modules
+npm install
+```
+
+== Referências
+
+Para mais informações, acesse a documentação oficial do npm em https://docs.npmjs.com.
